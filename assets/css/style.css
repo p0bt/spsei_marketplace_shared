@@ -1,0 +1,220 @@
+body {
+    /* Line below is needed because google's iframe is pushing body down */
+    top: 0 !important;
+    /* Default text color */
+    color: #293155;
+}
+
+/* Prevent user from dragging image and link */
+a, img {
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Navbar */
+#main-navigation-bar {
+    background-color: #272f54;
+}
+
+#secondary-navigation-bar {
+    background-color: #354070;
+    border-bottom: 1px solid grey;
+    height: 40px;
+}
+
+/* Change the size of banner carousel */
+#banner-carousel .carousel-item img {
+    height: 50vh;
+    object-fit: cover;
+    object-position: center;
+    overflow: hidden;
+}
+
+/* Add shading to banner carousel */
+#banner-carousel .carousel-item:before {
+    content: "";
+    background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 1));
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.banner-gradient {
+    background: rgb(39,47,84);
+    background: linear-gradient(90deg, rgba(39,47,84,1) 0%, rgba(53,64,112,1) 86%);
+}
+
+/* Dark card (grayscale filter) */
+.grey-filter {
+   -webkit-filter: grayscale(0%);
+   -moz-filter: grayscale(0%);
+   filter: grayscale(0%) brightness(100%);
+   transition: all 0.6s ease;
+}
+
+.grey-filter:hover {
+   -webkit-filter: grayscale(100%);
+   -moz-filter: grayscale(100%);
+   filter: grayscale(100%) brightness(50%);
+}
+
+/* Text over(on) image */
+.text-over-image {
+    position: absolute;
+}
+
+.text-over-image-center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Scroll to top button in bottom left corner */
+#btn-scroll-to-top {
+    display: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    position: fixed;
+    z-index: 100;
+    bottom: 20px;
+    right: 20px;
+    background: rgb(39,47,84);
+    background: linear-gradient(90deg, rgba(39,47,84,1) 0%, rgba(53,64,112,1) 86%);
+    border: 5px solid rgb(62, 74, 129);;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+/* New offer form style */
+#new-offer-form input[type="radio"] {
+    /* to do */
+    position: absolute;
+}
+
+/* Google translate customization */
+.goog-logo-link, .goog-te-banner-frame {
+    display: none !important;
+}
+
+.goog-te-gadget {
+    color: transparent !important;
+}
+
+/* DZ Upload customization */
+.dz-remove, .dz-remove:hover {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.big-text-48 {
+    font-size: 48px;
+}
+
+.big-text-24 {
+    font-size: 24px;
+}
+
+.big-text-16 {
+    font-size: 16px;
+}
+
+/*
+* ADMIN PANEL START
+*/
+
+#admin-footer {
+    background-color: black;
+}
+
+/* Admin panel - sidebar navigation */
+#wrapper {
+    border-top: 2px solid white;
+}
+
+#wrapper .sidebar-divider {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.count-box {
+    border-radius: 5px;
+    padding: 2px 4px 2px 4px;
+    background-color: #5160a3;
+    border: 1px solid black;
+    color: white;
+}
+
+#main-navigation-bar ul .count-box {
+    border-radius: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    color: black;
+}
+
+/*
+* ADMIN PANEL END
+*/
+
+/*
+* DARK MODE START
+*/
+.dark-mode, .dark-mode *:not(.swal2-container, .swal2-container *), .dark-mode :is(h1, h2, h3, h4, h5, h6):not(.swal2-container, .swal2-container *) {
+    background: black !important;
+    color: #e6e6e6 !important;
+    border-color: #e6e6e6 !important;
+    border-width: 1px !important;
+}
+
+.dark-mode body {
+    background: rgb(20, 20, 20) !important;
+}
+
+.dark-mode header *,
+.dark-mode footer,
+.dark-mode footer *,
+.dark-mode #admin-footer,
+.dark-mode .card *,
+.dark-mode table .even * {
+    background: rgb(11, 11, 11) !important;
+}
+
+.dark-mode #filters-col,
+.dark-mode #filters-col *,
+.dark-mode #admin-sidebar,
+.dark-mode #admin-sidebar * {
+    background: rgb(30, 30, 30) !important;
+}
+
+.dark-mode .carousel * {
+    background: none !important;
+}
+
+.dark-mode .progress {
+    border: 1px solid white;
+}
+
+.dark-mode .progress-bar {
+    background: rgb(160, 100, 255) !important;
+}
+
+.dark-mode .swal2-container {
+    background: none;
+    filter: invert(1);
+}
+
+.dark-mode .swal2-popup {
+    border: 1px solid rgb(0, 0, 0) !important;
+}
+/*
+* DARK MODE END
+*/

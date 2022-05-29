@@ -1,0 +1,16 @@
+{
+    "required": "Položka je povinná",
+    "min_length": "Položka nesplňuje minimální počet znaků",
+    "max_length": "Položka má příliš mnoho znaků",
+    "in_list": "Neplatná volba",
+    "matches": "Položka se musí shodovat",
+    "is_unique": "Záznam pro tuto položku již existuje",
+    "is_valid_email": "Neplatný email",
+    "is_valid_number": "Položka nemá formát čísla",
+    "greather_than": "Položka musí mít větší hodnotu",
+    "less_than": "Položka musí mít menší hodnotu",
+    "is_number": "Položka musí být platné číslo",
+    "is_valid_date": "Položka musí být platné datum",
+    "is_valid_datetime": "Položka musí být platný datum a čas",
+    "datetime_greather_than": "Datum a čas musí být větší"
+}

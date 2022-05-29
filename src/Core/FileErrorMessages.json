@@ -1,0 +1,6 @@
+{
+    "max_size": "Soubor je příliš velký",
+    "is_image": "Soubor není ve formátu: obrázek",
+    "min_count": "Počet nahraných souborů je menší, než je povoleno",
+    "max_count": "Počet nahraných souborů je větší, než je povoleno"
+}
