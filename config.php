@@ -1,5 +1,11 @@
 <?php
 
+/* ---- NOTE ----
+* THIS PROJECT RUNS ON
+* PHP Version 8.0.6 +
+* ---------------
+*/
+
 // set Timezone
 date_default_timezone_set("Europe/Prague");
 

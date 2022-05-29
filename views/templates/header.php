@@ -11,7 +11,6 @@
     <script src="/assets/js/jquery-3.6.0.min.js"></script>
     <script src="/assets/js/jquery-ui.min.js"></script>
     <script src="/assets/js/dropzone.min.js"></script>
-    <script src="/assets/js/bootstrap-lightbox.min.js"></script>
     <script src="/assets/js/sweet-alert.js"></script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script src="/assets/js/main.js"></script>
@@ -26,6 +25,8 @@
     <link href="/assets/css/animate.min.css" rel="stylesheet">
     <link href="/assets/css/aos.css" rel="stylesheet">
     <link href="/assets/css/swiper-bundle.min.css" rel="stylesheet">
+
+    <link href="/assets/images/icon.ico" rel="icon" type="image/x-icon">
 </head>
 
 <body class="bg-light">
@@ -77,7 +78,7 @@
             <nav class="navbar navbar-expand-lg" id="main-navigation-bar">
                 <div class="container-fluid">
                     <a class="navbar-brand mx-5" href="/domu">
-                        <img src="/assets/images/logo.png" height="auto" width="200">
+                        <img src="/assets/images/logo.png" height="60" width="auto">
                     </a>
                     <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Zobrazit menu">
                         <i class="fa-solid fa-bars"></i>
