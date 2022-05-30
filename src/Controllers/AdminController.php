@@ -28,12 +28,14 @@ class AdminController extends BaseController
 
     public function dashboard()
     {
+        $class_count = Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count'];
+
         // Data for cards ands charts
         $data['cards']['offer_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers`")->getRowArray()['count'];
         $data['cards']['auction_count'] = $this->auctions_model->get_count();
         $data['cards']['user_count'] = Database::query("SELECT COUNT(user_id) AS 'count' FROM `users`")->getRowArray()['count'];
         $data['cards']['banned_ip_count'] = Database::query("SELECT COUNT(bi_id) AS 'count' FROM `banned_ips`")->getRowArray()['count'];
-        $data['cards']['class_room_percentage'] = ceil((Database::query("SELECT COUNT(cr_id) AS 'count' FROM `class_room`")->getRowArray()['count'] / Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count']) * 100);
+        $data['cards']['class_room_percentage'] = $class_count > 0 ? ceil((Database::query("SELECT COUNT(cr_id) AS 'count' FROM `class_room`")->getRowArray()['count'] / Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count']) * 100) : 0;
         
         $data['charts']['offers_by_date'] = Database::query("SELECT COUNT(offer_id) AS 'count', DATE(`date`) AS 'date' FROM `offers` GROUP BY DATE(`date`)")->getResultArray();
         $data['charts']['offer_book_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers` WHERE `book_id` IS NOT NULL")->getRowArray()['count'];

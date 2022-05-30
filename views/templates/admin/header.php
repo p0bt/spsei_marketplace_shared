@@ -19,6 +19,8 @@
     <link href="/assets/css/dashboard.css" rel="stylesheet">
     <link href="/assets/css/datatables.min.css" rel="stylesheet">
     <link href="/assets/css/animate.min.css" rel="stylesheet">
+
+    <link href="/assets/images/icon.ico" rel="icon" type="image/x-icon">
 </head>
 
 <body>
