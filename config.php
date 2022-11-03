@@ -14,7 +14,7 @@ date_default_timezone_set("Europe/Prague");
 
 // Site settings
 define("SITE_PATH", __DIR__);
-define("SITE_TITLE", "SPŠEI Marketplace");
+define("SITE_TITLE", "SPŠEI BookMarket");
 define("SITE_URL", "localhost");
 define("SITE_IP", "127.0.0.1");
 
