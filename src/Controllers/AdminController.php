@@ -1,4 +1,19 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Core\Validator;
+use SpseiMarketplace\Core\Database;
+use SpseiMarketplace\Core\HelperFunctions;
+use SpseiMarketplace\Models\Offer;
+use SpseiMarketplace\Models\User;
+use SpseiMarketplace\Models\SchoolClass;
+use SpseiMarketplace\Models\Book;
+use SpseiMarketplace\Models\ClassRoom;
+use SpseiMarketplace\Models\BannedIp;
+use SpseiMarketplace\Models\Notification;
+use SpseiMarketplace\Models\Auction;
+use SpseiMarketplace\Models\Api;
+use SpseiMarketplace\Models\Category;
 
 class AdminController extends BaseController
 {
@@ -11,6 +26,7 @@ class AdminController extends BaseController
     private $banned_ip_model;
     private $notifications_model;
     private $auctions_model;
+    private $category_model;
 
     public function __construct()
     {
@@ -24,23 +40,22 @@ class AdminController extends BaseController
         $this->notifications_model = new Notification();
         $this->auctions_model = new Auction();
         $this->api_model = new Api();
+        $this->category_model = new Category();
     }
 
     public function dashboard()
     {
-        $class_count = Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count'];
-
-        // Data for cards ands charts
+        // Data for cards
         $data['cards']['offer_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers`")->getRowArray()['count'];
         $data['cards']['auction_count'] = $this->auctions_model->get_count();
         $data['cards']['user_count'] = Database::query("SELECT COUNT(user_id) AS 'count' FROM `users`")->getRowArray()['count'];
         $data['cards']['banned_ip_count'] = Database::query("SELECT COUNT(bi_id) AS 'count' FROM `banned_ips`")->getRowArray()['count'];
-        $data['cards']['class_room_percentage'] = $class_count > 0 ? ceil((Database::query("SELECT COUNT(cr_id) AS 'count' FROM `class_room`")->getRowArray()['count'] / Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count']) * 100) : 0;
-        
+        $data['cards']['class_room_percentage'] = ceil((Database::query("SELECT COUNT(cr_id) AS 'count' FROM `class_room`")->getRowArray()['count'] / Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count']) * 100);
+        // Data for charts
         $data['charts']['offers_by_date'] = Database::query("SELECT COUNT(offer_id) AS 'count', DATE(`date`) AS 'date' FROM `offers` GROUP BY DATE(`date`)")->getResultArray();
-        $data['charts']['offer_book_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers` WHERE `book_id` IS NOT NULL")->getRowArray()['count'];
+        $data['charts']['offer_book_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers` WHERE `book_ISBN` IS NOT NULL")->getRowArray()['count'];
         $data['charts']['offer_other_count'] =  $data['cards']['offer_count'] -  $data['charts']['offer_book_count'];
-
+        // Data for widgets
         $this->offers_model->set_limit(0, 5);
         $data['widgets']['last_offers'] = $this->offers_model->get_all("date", "DESC");
         $data['widgets']['users'] = $this->users_model->get_all();
@@ -148,14 +163,18 @@ class AdminController extends BaseController
         if($_POST)
         {
             $this->validator->addMultipleRules([
+                'isbn' => 'required|max_length[13]',
                 'name' => 'required|max_length[50]',
                 'author' => 'required|max_length[50]',
+                'category' => 'required|is_not_unique[categories.category_id]',
             ]);
             if ($this->validator->run())
             {
                 $post_data = [
+                    'book_ISBN' => $_POST['isbn'],
                     'name' => $_POST['name'],
                     'author' => $_POST['author'],
+                    'category_id' => $_POST['category'],
                 ];
                 $this->books_model->post($post_data);
             }
@@ -166,6 +185,8 @@ class AdminController extends BaseController
         }
 
         $data['books'] = $this->books_model->get_all();
+        // Remove 'sesity' from categories, because it's not a category for books
+        $data['categories'] = array_slice($this->category_model->get_all(), 0, 3);
 
         $this->render("views/templates/admin/header.php");
         $this->render("views/admin/book_maintenance.php", $data);

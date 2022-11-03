@@ -1,4 +1,9 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Core\Validator;
+use SpseiMarketplace\Core\Filter;
+use SpseiMarketplace\Models\Offer;
 
 class WishlistController extends BaseController
 {

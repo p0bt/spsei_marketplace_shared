@@ -126,6 +126,37 @@ a, img {
 }
 
 /*
+* CHAT START
+*/
+
+.ch-text-small {
+    font-size: 0.9rem;
+}
+
+.messages-box,
+.chat-box {
+    height: 600px;
+    overflow-y: scroll;
+}
+
+.list-group-item.active {
+    background-color: #536cd7;
+}
+
+.chat-background {
+    background-color: #4c5b9c;
+}
+
+.chat-input::placeholder {
+    font-size: 0.9rem;
+    color: #999;
+}
+
+/*
+* CHAT END
+*/
+
+/*
 * ADMIN PANEL START
 */
 
@@ -168,7 +199,7 @@ a, img {
 /*
 * DARK MODE START
 */
-.dark-mode, .dark-mode *:not(.swal2-container, .swal2-container *), .dark-mode :is(h1, h2, h3, h4, h5, h6):not(.swal2-container, .swal2-container *) {
+.dark-mode, .dark-mode *:not(.swal2-container, .swal2-container *, #confetti-canvas, #confetti-canvas *), .dark-mode :is(h1, h2, h3, h4, h5, h6):not(.swal2-container, .swal2-container *) {
     background: black !important;
     color: #e6e6e6 !important;
     border-color: #e6e6e6 !important;

@@ -1,10 +1,13 @@
 <?php
+namespace SpseiMarketplace\Core;
+
+use DateTime, Exception;
 
 class InputRules 
 {
     public function required($input_value, $rule_value)
     {
-        return (isset($input_value) && strlen($input_value) > 0 && !empty($input_value));
+        return $input_value == "0" || (isset($input_value) && strlen($input_value) > 0 && !empty($input_value));
     }
 
     public function min_length($input_value, $rule_value)

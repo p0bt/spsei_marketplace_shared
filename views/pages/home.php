@@ -57,7 +57,7 @@
             </a>
         </div>
         <div class="col-4">
-            <a href="/nabidky?category%5B%5D=sesit" class="text-white text-decoration-none grey-filter">
+            <a href="/nabidky?category%5B%5D=sesity" class="text-white text-decoration-none grey-filter">
                 <div style="background-color: khaki;" data-aos="zoom-in-up" data-aos-delay="300">
                     <img src="/assets/images/notebook_icon.png" alt="Sešity" class="w-100">
                     <p class="text-over-image text-over-image-center">Sešity</p>

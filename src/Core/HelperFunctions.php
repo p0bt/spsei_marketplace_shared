@@ -1,4 +1,5 @@
 <?php
+namespace SpseiMarketplace\Core;
 
 class HelperFunctions 
 {
@@ -28,7 +29,7 @@ class HelperFunctions
             foreach($_POST[$input_name] as $inp)
             {
                 if(strcmp($inp, $input_value) == 0)
-                return 'checked';
+                    return 'checked';
             }
         }
         if(isset($_GET[$input_name]))
@@ -36,7 +37,7 @@ class HelperFunctions
             foreach($_GET[$input_name] as $inp)
             {
                 if(strcmp($inp, $input_value) == 0)
-                return 'checked';
+                    return 'checked';
             }
         }
         return '';

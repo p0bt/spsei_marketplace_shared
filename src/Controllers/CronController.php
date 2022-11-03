@@ -1,4 +1,12 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Core\Filter;
+use SpseiMarketplace\Core\Mail;
+use SpseiMarketplace\Models\Offer;
+use SpseiMarketplace\Models\User;
+use SpseiMarketplace\Models\Notification;
+use SpseiMarketplace\Models\Auction;
 
 class CronController
 {

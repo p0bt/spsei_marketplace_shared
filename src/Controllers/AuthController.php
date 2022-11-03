@@ -1,4 +1,9 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Core\Validator;
+use SpseiMarketplace\Core\HelperFunctions;
+use SpseiMarketplace\Models\User;
 
 class AuthController extends BaseController
 {

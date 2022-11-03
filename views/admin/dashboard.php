@@ -1,3 +1,7 @@
+<?php
+use SpseiMarketplace\Core\HelperFunctions;
+?>
+
 <div class="container-fluid">
     <?php if ($alert = HelperFunctions::getAlert("success")) : ?>
         <div class="row mt-3">
@@ -146,7 +150,7 @@
                                 $thumbnail = '/assets/images/no_image.png';
                             
                             // Show book name and it's author or just name in case of notebooks
-                            if(isset($offer['b_name']))
+                            if(isset($offer['b_name']) && !empty($offer['b_name']))
                             {
                                 $name = $offer['b_name'].' ('.$offer['b_author'].')';
                             }

@@ -1,3 +1,8 @@
+<?php
+
+use SpseiMarketplace\Core\HelperFunctions;
+?>
+
 <style>
     .card-img-top {
         width: 100%;
@@ -31,7 +36,7 @@
                     </div>
                     <div class="row my-5">
                         <div class="col-12">
-                            <h5>Cena</h5>
+                            <h5>Cena / Typ</h5>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="price_type" id="price-radio-vse" value="vse" <?= HelperFunctions::setRadio("price_type", "vse") ?> required <?= (!isset($_POST['price_type'])) ? "checked" : "" ?>>
                                 <label class="form-check-label" for="price-radio-vse">
@@ -50,6 +55,12 @@
                                     <div>Aukce</div>
                                 </label>
                             </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="price_type" id="price-radio-zdarma" value="zdarma" <?= HelperFunctions::setRadio("price_type", "zdarma") ?>>
+                                <label class="form-check-label" for="price-radio-zdarma">
+                                    <div>Zdarma</div>
+                                </label>
+                            </div>
                             <div id="price-filter">
 
                             </div>
@@ -58,18 +69,14 @@
                     <div class="row my-5">
                         <h5>Kategorie</h5>
                         <div class="col-12">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="category[]" id="category-radio-ucebnice" value="ucebnice" <?= HelperFunctions::setCheckbox("category", "ucebnice") ?>>
-                                <label class="form-check-label">
-                                    Učebnice / Pracovní sešity
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="category[]" id="category-radio-sesit" value="sesit" <?= HelperFunctions::setCheckbox("category", "sesit") ?>>
-                                <label class="form-check-label" for="category-radio-sesit">
-                                    Sešity (Poznámky)
-                                </label>
-                            </div>
+                            <?php foreach ($categories as $category) : ?>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="category[]" id="category-radio-<?= $category['value'] ?>" value="<?= $category['value'] ?>" <?= HelperFunctions::setCheckbox("category", $category['value']) ?>>
+                                    <label class="form-check-label" for="category-radio-<?= $category['value'] ?>">
+                                        <?= $category['name'] ?>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
@@ -87,15 +94,15 @@
             <div class="row my-md-3 mt-3 mb-5">
                 <div class="col-12">
                     <?php
-                        $allowed_display = [
-                            "list",
-                            "grid",
-                        ];
-                        // Default display method is list
-                        if(isset($_GET['d']) && in_array($_GET['d'], $allowed_display))
-                            $display = $_GET['d'];
-                        else
-                            $display = "list";
+                    $allowed_display = [
+                        "list",
+                        "grid",
+                    ];
+                    // Default display method is list
+                    if (isset($_GET['d']) && in_array($_GET['d'], $allowed_display))
+                        $display = $_GET['d'];
+                    else
+                        $display = "list";
                     ?>
                     <div class="d-flex justify-content-between">
                         <div>
@@ -108,114 +115,112 @@
                     </div>
                 </div>
             </div>
-            <?php if(isset($offers) && !empty($offers)): ?>
-                <?php if($display == "grid"): ?>
+            <?php if (isset($offers) && !empty($offers)) : ?>
+                <?php if ($display == "grid") : ?>
                     <div class="row">
-                <?php endif; ?>
-                <?php foreach($offers as $offer): ?>
-                    <?php
+                    <?php endif; ?>
+                    <?php foreach ($offers as $offer) : ?>
+                        <?php
                         // Get first image from user image directory
                         $thumbnail = '/assets/images/no_image.png';
 
-                        if(is_dir(SITE_PATH.'/uploads/'.$offer['image_path']))
-                        {
-                            $images = array_values(array_diff(scandir(SITE_PATH.'/uploads/'.$offer['image_path']), ['.', '..']));
-                            $thumbnail = '/uploads/'.$offer['image_path'].'/'.$images[0];
+                        if (is_dir(SITE_PATH . '/uploads/' . $offer['image_path'])) {
+                            $images = array_values(array_diff(scandir(SITE_PATH . '/uploads/' . $offer['image_path']), ['.', '..']));
+                            $thumbnail = '/uploads/' . $offer['image_path'] . '/' . $images[0];
                         }
-                        
+
                         // Show book name and it's author or just name in case of notebooks
                         $name = $offer['name'];
 
-                        if(isset($offer['b_name']) && !empty($offer['b_name']))
-                        {
-                            $name = $offer['b_name'].' ('.$offer['b_author'].')';
+                        if (isset($offer['b_name']) && !empty($offer['b_name'])) {
+                            $name = $offer['b_name'] . ' (' . $offer['b_author'] . ')';
                         }
-                    ?>
-                    <?php if($display == "list"): ?>
-                        <div class="row">
-                            <div class="col-md-2 col-6 text-center">
-                                <img src="<?= $thumbnail ?>" class="img-fluid" alt="<?= $name ?>" data-tilt>
-                            </div>
-                            <div class="col-md-6 col-6 d-flex justify-content-center align-items-center text-center">
-                                <div>
-                                    <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="text-decoration-none text-dark">
-                                        <h5 class="card-title">
-                                            <?= $name ?>
-                                        </h5>
-                                    </a>
-                                    <?= substr($offer['description'], 0, 30) ?>...
+                        ?>
+                        <?php if ($display == "list") : ?>
+                            <div class="row">
+                                <div class="col-md-2 col-6 text-center">
+                                    <img src="<?= $thumbnail ?>" class="img-fluid" alt="<?= $name ?>" data-tilt>
                                 </div>
-                            </div>
-                            <div class="col-md-2 col-6 d-flex justify-content-center align-items-center">
-                                <?php if(isset($offer['a_start_date']) && isset($offer['a_end_date']) && !empty($offer['a_start_date']) && !empty($offer['a_end_date'])): ?>
-                                    <div class="auction">
-                                        <div class="auction-info fw-bold"></div>
-                                        <div class="auction-start-date" data-date="<?= $offer['a_start_date'] ?>"></div>
-                                        <div class="auction-end-date" data-date="<?= $offer['a_end_date'] ?>"></div>
+                                <div class="col-md-6 col-6 d-flex justify-content-center align-items-center text-center">
+                                    <div>
+                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="text-decoration-none text-dark">
+                                            <h5 class="card-title">
+                                                <?= $name ?>
+                                            </h5>
+                                        </a>
+                                        <?= substr($offer['description'], 0, 30) ?>...
                                     </div>
-                                <?php elseif(isset($offer['price']) && !empty($offer['price'])): ?>
-                                    <?= $offer['price'] ?> Kč
-                                <?php endif; ?>
-                            </div>
-                            <div class="col-md-2 col-6 d-flex justify-content-center align-items-center">
-                                <div class="d-flex flex-wrap text-center justify-content-center align-items-center">
-                                    <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="btn btn-primary w-md-100">Podrobnosti</a>
-                                    <?php if(isset($_SESSION['user_data']['user_id']) && ($_SESSION['user_data']['user_id'] != $offer['user_id'])): ?>
-                                        <a href="javascript:void(0);" class="w-md-100 btn-add-offer-to-wishlist mx-2" data-id="<?= $offer['offer_id'] ?>"><i class="fa-solid fa-heart" style="color: <?= (isset($_SESSION['wishlist']) && in_array($offer['offer_id'], $_SESSION['wishlist'])) ? "red" : "black" ?>;"></i></a>
+                                </div>
+                                <div class="col-md-2 col-6 d-flex justify-content-center align-items-center">
+                                    <?php if (isset($offer['a_start_date']) && isset($offer['a_end_date']) && !empty($offer['a_start_date']) && !empty($offer['a_end_date'])) : ?>
+                                        <div class="auction">
+                                            <div class="auction-info fw-bold"></div>
+                                            <div class="auction-start-date" data-date="<?= $offer['a_start_date'] ?>"></div>
+                                            <div class="auction-end-date" data-date="<?= $offer['a_end_date'] ?>"></div>
+                                        </div>
+                                    <?php else: ?>
+                                        <?= $offer['price'] == 0 ? "Zdarma" : $offer['price']." Kč" ?>
                                     <?php endif; ?>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <hr class="w-100 light">
-                            </div>
-                        </div>
-                    <?php elseif($display == "grid"): ?>
-                        <div class="col-xl-4 col-md-6 col-12">
-                            <div class="card card-card mb-md-0 mb-5">
-                                <img src="<?= $thumbnail ?>" class="card-img-top" alt="<?= $name ?>" data-tilt>
-                                <div class="card-body">
-                                    <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="text-decoration-none text-dark">
-                                        <h5 class="card-title">
-                                            <?= $name ?>
-                                        </h5>
-                                    </a>
-                                    <div class="card-text">
-                                        <div class="small">
-                                            <b>Kategorie: <?= $offer['category'] ?></b>
-                                        </div>
-                                        <div>
-                                            <?php if(isset($offer['a_start_date']) && isset($offer['a_end_date']) && !empty($offer['a_start_date']) && !empty($offer['a_end_date'])): ?>
-                                                <div class="auction-info fw-bold"></div>
-                                                <div class="auction-start-date" data-date="<?= $offer['a_start_date'] ?>"></div>
-                                                <div class="auction-end-date" data-date="<?= $offer['a_end_date'] ?>"></div>
-                                            <?php elseif(isset($offer['price']) && !empty($offer['price'])): ?>
-                                                <em>Cena: <?= $offer['price'] ?> Kč</em>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="pt-2">
-                                            <?= substr($offer['description'], 0, 30) ?>...
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="btn btn-primary mt-2">Podrobnosti</a>
-                                        <?php if(isset($_SESSION['user_data']['user_id']) && ($_SESSION['user_data']['user_id'] != $offer['user_id'])): ?>
+                                <div class="col-md-2 col-6 d-flex justify-content-center align-items-center">
+                                    <div class="d-flex flex-wrap text-center justify-content-center align-items-center">
+                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="btn btn-primary w-md-100">Podrobnosti</a>
+                                        <?php if (isset($_SESSION['user_data']['user_id']) && ($_SESSION['user_data']['user_id'] != $offer['user_id'])) : ?>
                                             <a href="javascript:void(0);" class="w-md-100 btn-add-offer-to-wishlist mx-2" data-id="<?= $offer['offer_id'] ?>"><i class="fa-solid fa-heart" style="color: <?= (isset($_SESSION['wishlist']) && in_array($offer['offer_id'], $_SESSION['wishlist'])) ? "red" : "black" ?>;"></i></a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-                <?php if($display == "grid"): ?>
+                            <div class="row">
+                                <div class="col-12">
+                                    <hr class="w-100 light">
+                                </div>
+                            </div>
+                        <?php elseif ($display == "grid") : ?>
+                            <div class="col-xl-4 col-md-6 col-12">
+                                <div class="card card-card mb-md-0 mb-5">
+                                    <img src="<?= $thumbnail ?>" class="card-img-top" alt="<?= $name ?>" data-tilt>
+                                    <div class="card-body">
+                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="text-decoration-none text-dark">
+                                            <h5 class="card-title">
+                                                <?= $name ?>
+                                            </h5>
+                                        </a>
+                                        <div class="card-text">
+                                            <div class="small">
+                                                <b>Kategorie: <?= $offer['cat_name'] ?></b>
+                                            </div>
+                                            <div>
+                                                <?php if (isset($offer['a_start_date']) && isset($offer['a_end_date']) && !empty($offer['a_start_date']) && !empty($offer['a_end_date'])) : ?>
+                                                    <div class="auction-info fw-bold"></div>
+                                                    <div class="auction-start-date" data-date="<?= $offer['a_start_date'] ?>"></div>
+                                                    <div class="auction-end-date" data-date="<?= $offer['a_end_date'] ?>"></div>
+                                                <?php elseif (isset($offer['price']) && !empty($offer['price'])) : ?>
+                                                    <em>Cena: <?= $offer['price'] ?> Kč</em>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="pt-2">
+                                                <?= substr($offer['description'], 0, 30) ?>...
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="btn btn-primary mt-2">Podrobnosti</a>
+                                            <?php if (isset($_SESSION['user_data']['user_id']) && ($_SESSION['user_data']['user_id'] != $offer['user_id'])) : ?>
+                                                <a href="javascript:void(0);" class="w-md-100 btn-add-offer-to-wishlist mx-2" data-id="<?= $offer['offer_id'] ?>"><i class="fa-solid fa-heart" style="color: <?= (isset($_SESSION['wishlist']) && in_array($offer['offer_id'], $_SESSION['wishlist'])) ? "red" : "black" ?>;"></i></a>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    <?php if ($display == "grid") : ?>
                     </div>
                 <?php endif; ?>
                 <div class="w-100 text-center p-5">
                     <?= $pagination->render() ?>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <div class="row">
                     <div class="col-12">
                         Nejsou zde žádné nabídky
@@ -264,16 +269,16 @@
 <script>
     $(document).ready(function() {
         render_price_filter($("input[name='price_type']:checked").val());
-        <?php if($auction_count > 0): ?>
+        <?php if ($auction_count > 0) : ?>
             print_auction_info();
         <?php endif; ?>
-        
+
         $("#btn-filter").click(function() {
             $("#filter-modal .modal-body").html($("#filter-inputs").clone());
         });
 
         $(".btn-add-offer-to-wishlist").click(function() {
-            
+
             let offer_id = $(this).data('id');
             let _this = $(this);
 
@@ -293,11 +298,10 @@
                         showConfirmButton: false,
                         timer: 1500
                     }).then(function() {
-                        if(data.action === "add") {
+                        if (data.action === "add") {
                             add_to_wishlist();
                             $(_this).children("svg").css("color", "red");
-                        }
-                        else {
+                        } else {
                             delete_from_wishlist();
                             $(_this).children("svg").css("color", "black");
                         }
@@ -332,7 +336,7 @@
             }
         }
 
-        <?php if($auction_count > 0): ?>
+        <?php if ($auction_count > 0) : ?>
             // Each second refresh auction info within offers of auction type
             setInterval(function() {
                 print_auction_info();

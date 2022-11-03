@@ -1,4 +1,5 @@
 <?php
+namespace SpseiMarketplace\Core;
 
 class Mail 
 {

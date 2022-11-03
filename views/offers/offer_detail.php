@@ -1,3 +1,7 @@
+<?php
+use SpseiMarketplace\Core\HelperFunctions;
+?>
+
 <style>
     #thumbnail {
         height: 100%;
@@ -6,9 +10,18 @@
 </style>
 
 <div class="container">
+    <?php if($is_auction && !isset($_SESSION['user_data'])): ?>
+        <div class="row mt-2">
+            <div class="col-10 mx-auto">
+                <div class="alert alert-danger text-center">
+                    Pro zapojení do aukce je třeba být <a href="/prihlaseni">přihlášen!</a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
     <div class="row mt-2">
         <div class="col-10 mx-auto">
-            <div class="current-auction-info">
+            <div class="current-auction-info" style="display: none;">
                 <div class="alert alert-success text-center">
                     <span class="current-time" style="position: absolute; right: 10px; top: 0;"></span>
                     <div class="auction-owner fw-bold"></div>
@@ -43,19 +56,17 @@
         </div>
         <div class="col-md-6 col-12 d-flex justify-content-center align-items-center text-md-start text-center order-md-2 order-3">
             <div>
-                <?php if($offer['user_id'] == $_SESSION['user_data']['user_id']): ?>
+                <?php if(isset($_SESSION['user_data']) && $offer['user_id'] == $_SESSION['user_data']['user_id']): ?>
                     <h5 class="my-0"><em>Vaše nabídka</em></h5>
                 <?php endif; ?>
 
                 <h2><?= $name ?></h2>
-                <p class="small">Kategorie: <?= $offer['category'] ?></p>
+                <p class="small">Kategorie: <?= $offer['cat_name'] ?></p>
                 <p><?= $offer['description'] ?></p>
                 
-                <?php if(isset($offer['price']) && !empty($offer['price'])): ?>
-                    <?php $auction = false; ?>
-                    <b>Cena: <?= $offer['price'] ?> Kč</b>
-                <?php elseif(isset($offer['a_auction_id']) && !empty($offer['a_auction_id'])): ?>
-                    <?php $auction = true; ?>
+                <?php if(!$is_auction): ?>
+                    <b>Cena: <?= $offer['price'] == 0 ? "Zdarma" : $offer['price']." Kč" ?></b>
+                <?php else: ?>
                     <div class="auction my-2 d-flex justify-content-md-start justify-content-center align-items-center">
                         <div class="auction">
                             <div class="auction-info fw-bold"></div>
@@ -76,15 +87,16 @@
                     </div>
                 <?php endif; ?>
 
-                <?php if($offer['user_id'] != $_SESSION['user_data']['user_id']): ?>
+                <?php if(!isset($_SESSION['user_data']) || $offer['user_id'] != $_SESSION['user_data']['user_id']): ?>
                     <div class="row mt-3 g-0">
                         <div class="col-md-2 col-12 p-0 mb-md-0 mb-1">
-                        <a type="button" class="h-100 me-md-1 me-0 btn btn-primary d-flex justify-content-center align-items-center" href="mailto:<?= $offer['email'] ?>"><i class="fa-solid fa-paper-plane"></i></a>
-
+                            <a type="button" class="h-100 me-md-1 me-0 btn btn-primary d-flex justify-content-center align-items-center" href="#" id="btn-send-message" data-id="<?= $offer['user_id'] ?>"><i class="fa-solid fa-comment"></i></a>
                         </div>
-                        <div class="col-md-10 col-12 p-0">
-                        <a type="button" class="btn btn-primary d-flex justify-content-center align-items-center" id="btn-contact-form" href="#contact-form">Kontaktovat přes formulář</a>
-
+                        <div class="col-md-2 col-12 p-0 mb-md-0 mb-1">
+                            <a type="button" class="h-100 me-md-1 me-0 btn btn-primary d-flex justify-content-center align-items-center" href="mailto:<?= $offer['email'] ?>"><i class="fa-solid fa-paper-plane"></i></a>
+                        </div>
+                        <div class="col-md-8 col-12 p-0 mb-md-0 mb-1">
+                            <a type="button" class="btn btn-primary d-flex justify-content-center align-items-center" id="btn-contact-form" href="#contact-form">Formulář</a>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -132,31 +144,49 @@
 
         // Lines below are called after document is loaded
         show_image($(".small-image")[0]);
-        $('.current-auction-info').css("display", "none");
 
-        <?php if($auction): ?>
+        <?php if($is_auction): ?>
+            // WebSocket connection
+            let socket = io('<?= WEBSOCKETS_PROTOCOL ?>://<?= SITE_URL ?>:<?= WEBSOCKETS_PORT ?>', {
+                secure: true
+            });
+
             let i = 0;
             let now = new Date();
             let auction_id = <?= $offer['a_auction_id'] ?>;
             let state = get_current_state(auction_id);
 
-            // Lines below are called after document is loaded
-            $('.current-auction-info').css("display", "block");
+            // Initaliaze
+            state = get_current_state(auction_id);
+            
+            $('.current-auction-info').css("display", (is_auction_in_progress(new Date("<?= $offer['a_start_date'] ?>"), new Date("<?= $offer['a_end_date'] ?>")) ? "block" : "none"));
+        
+            print_auction_info();
             print_current_time();
-            print_auction(auction_id);
-            $("#bid").attr("placeholder", parseInt(state.top_bid) + 1);
-            $("#bid").attr("min", parseInt(state.top_bid) + 1);
+            print_auction_state(state);
+            check_current_winner();
 
-            // Each second refresh auction info within offers of auction type
-            setInterval(function() {
-                let state = get_current_state(auction_id);
+            let min_bid_value = (state.top_bid.length > 0) ? parseInt(state.top_bid)+1 : 0;
+            $("#bid").attr("placeholder", min_bid_value);
+            $("#bid").attr("min", min_bid_value);
 
-                print_current_time();
-                print_auction(auction_id);
+            // On auction change - refresh info of auction
+            socket.on('auction_change', data => {
+                state = get_current_state(auction_id);
+
+                print_auction_state(state);
                 check_current_winner();
 
-                $("#bid").attr("placeholder", parseInt(state.top_bid) + 1);
-                $("#bid").attr("min", parseInt(state.top_bid) + 1);
+                let min_bid_value = (state.top_bid.length > 0) ? parseInt(state.top_bid)+1 : 0;
+                $("#bid").attr("placeholder", min_bid_value);
+                $("#bid").attr("min", min_bid_value);
+            });
+
+            // Call each second
+            setInterval(function() {
+
+                print_auction_info();
+                print_current_time();
 
                 // If user can bid button is available -> else we are showing seconds till next possible bid
                 if(can_user_bid())
@@ -171,6 +201,8 @@
                     $("#btn-make-bid").text(parseInt(<?= AUCTION_BID_DELAY ?>) - (i+1));
                     i++;
                 }
+
+                $('.current-auction-info').css("display", (is_auction_in_progress(new Date("<?= $offer['a_start_date'] ?>"), new Date("<?= $offer['a_end_date'] ?>")) ? "block" : "none"));
             }, 1000);
 
             $("#auction-form").submit(function(e) {
@@ -178,10 +210,6 @@
             
                 let bid = parseInt($("#bid").val());
                 rise_price(auction_id, bid);
-
-                $("#bid").val("");
-                $("#bid").attr("placeholder", bid + 1);
-                $("#bid").attr("min", bid + 1);
 
                 Swal.fire({
                     position: 'bottom-end',
@@ -195,8 +223,8 @@
             });
 
             function check_current_winner() {
-                if(state.user_id == <?= $_SESSION['user_data']['user_id'] ?>) {
-                    console.log("jj");
+                let user_id = "<?= isset($_SESSION['user_data']['user_id']) ? $_SESSION['user_data']['user_id'] : "" ?>";
+                if(state.user_id == user_id) {
                     confetti.start();
                 }
                 else {
@@ -204,6 +232,23 @@
                 }
             }
         <?php endif; ?>
+
+        $("#btn-send-message").click(function() {
+            let user_id = $(this).data('id');
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/create-new-chat",
+                data: {
+                    "user_id": user_id,
+                },
+                success: function(data) {
+                    if(data) {
+                        window.location.href = data;
+                    }
+                },
+            });
+        });
 
         $(".small-image").click(function() {
             show_image($(this));

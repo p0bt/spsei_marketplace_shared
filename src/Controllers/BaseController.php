@@ -1,4 +1,7 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Models\Notification;
 
 abstract class BaseController
 {

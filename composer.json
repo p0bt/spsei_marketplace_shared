@@ -1,0 +1,19 @@
+{
+    "name": "p0bt/spseimarketplace",
+    "description": "Spšei Marketplace - School Project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "SpseiMarketplace\\": "src/"
+        }
+    },
+    "require": {
+        "cboden/ratchet": "^0.4.4",
+        "ratchet/pawl": "^0.4.1",
+        "workerman/phpsocket.io-emitter": "^1.0",
+        "workerman/phpsocket.io": "^1.1"
+    },
+    "config": {
+        "platform-check": false
+    }
+}

@@ -16,6 +16,8 @@
     <script src="/assets/js/main.js"></script>
     <script src="/assets/js/swiper-bundle.min.js"></script>
     <script src="/assets/js/confetti.js"></script>
+    <!-- SocketIO -->
+    <script src="/assets/js/SocketIO/socket.io.js"></script>
     <!-- CSS -->
     <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="/assets/css/jquery-ui.min.css" rel="stylesheet">
@@ -35,19 +37,22 @@
             <div class="container-fluid">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link text-white" aria-current="page" href="/oblibene"><i class="fa-solid fa-heart me-2"></i> 
-                            Oblíbené 
+                        <a class="nav-link text-white" aria-current="page" href="/oblibene"><i class="fa-solid fa-heart me-2"></i>
+                            Oblíbené
                             <span class="count-box item-count-box">
                                 <?= (isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0) ?>
                             </span>
                         </a>
                     </li>
-                    <?php if(isset($_SESSION['user_data'])): ?>
+                    <?php if (isset($_SESSION['user_data'])) : ?>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/nova-nabidka"><i class="fa-solid fa-arrow-up-from-bracket me-2"></i></i>Zveřejnit nabídku</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white" aria-current="page" href="/muj-ucet"><i class="fa-solid fa-user me-2"></i>Můj účet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" aria-current="page" href="/zpravy"><i class="fa-solid fa-comment me-2"></i>Zprávy</a>
                         </li>
                         <li class="nav-item">
                             <button class="nav-link text-white bg-transparent border-0" aria-current="page" data-bs-toggle="modal" data-bs-target="#notifications-modal"><i class="fa-solid fa-bell me-2"></i>
@@ -60,9 +65,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/odhlaseni"><i class="fa-solid fa-right-from-bracket me-2"></i>Odhlásit se</a>
                         </li>
-                    <?php else: ?>
+                    <?php else : ?>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/nabidky?category%5B%5D=sesit"><i class="fa-solid fa-book-open me-2"></i></i>Sešity</a>
+                            <a class="nav-link text-white" href="/nabidky?category%5B%5D=sesity"><i class="fa-solid fa-book-open me-2"></i></i>Sešity</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/nabidky?category%5B%5D=ucebnice"><i class="fa-solid fa-book me-2"></i></i>Učebnice</a>
@@ -97,14 +102,14 @@
                                         <a class="dropdown-item" href="/nabidky"><i class="fa-solid fa-border-all me-2"></i>Vše</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/nabidky?category%5B%5D=sesit"><i class="fa-solid fa-book-open me-2"></i>Sešity</a>
+                                        <a class="dropdown-item" href="/nabidky?category%5B%5D=sesity"><i class="fa-solid fa-book-open me-2"></i>Sešity</a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="/nabidky?category%5B%5D=ucebnice"><i class="fa-solid fa-book me-2"></i>Učebnice</a>
                                     </li>
                                 </ul>
                             </li>
-                            <?php if(isset($_SESSION['user_data'])): ?>
+                            <?php if (isset($_SESSION['user_data'])) : ?>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fa-solid fa-user me-2"></i>Můj účet
@@ -122,13 +127,16 @@
                                             <a class="dropdown-item" href="/muj-ucet"><i class="fa-solid fa-user me-2"></i>Můj účet</a>
                                         </li>
                                         <li>
+                                            <a class="dropdown-item" href="/zpravy"><i class="fa-solid fa-comment me-2"></i></i>Zprávy</a>
+                                        </li>
+                                        <li>
                                             <button class="dropdown-item bg-transparent border-0" aria-current="page" data-bs-toggle="modal" data-bs-target="#notifications-modal"><i class="fa-solid fa-bell me-2"></i>
                                                 Oznámení
                                                 <span class="count-box notifications-count-box">
                                                     <b>(<?= (isset($notifications) ? count($notifications) : 0) ?>)</b>
                                                 </span>
                                             </button>
-                                        </li>   
+                                        </li>
                                         <li>
                                             <a class="dropdown-item" href="/nova-nabidka"><i class="fa-solid fa-arrow-up-from-bracket me-2"></i></i>Zveřejnit nabídku</a>
                                         </li>
@@ -137,7 +145,7 @@
                                         </li>
                                     </ul>
                                 </li>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <li class="nav-item">
                                     <a class="nav-link text-white" href="/prihlaseni"><i class="fa-solid fa-lock me-2"></i>Přihlásit se</a>
                                 </li>

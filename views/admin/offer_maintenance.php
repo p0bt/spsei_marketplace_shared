@@ -13,7 +13,7 @@
                         <th>Název</th>
                         <th>Popis</th>
                         <th>Kategorie</th>
-                        <th>Cena</th>
+                        <th>Cena / Typ</th>
                         <th>Adresář s obrázky</th>
                         <th>Datum zveřejnění</th>
                         <th>Akce</th>
@@ -44,7 +44,7 @@
                 {
                     data: null,
                     render: function(data, type, row) {
-                        if(row['b_book_id'] != null)
+                        if(row['b_book_ISBN'] !== null && row['b_book_ISBN'].length > 0)
                             return row['b_name'] + " (" + row['b_author'] + ")";
                         return row['name'];
                     },
@@ -53,21 +53,17 @@
                     data: 'description',
                 },
                 {
-                    data: 'category',
+                    data: 'cat_name',
                     className: "text-center",
-                    render: function(data, type, row) {
-                        switch(data)
-                        {
-                            case 'sesit': return '<i class="fa-solid fa-book-open">'; break;
-                            case 'ucebnice': return '<i class="fa-solid fa-book">'; break;
-                            default: return '-'; break;
-                        }
-                    },
                 },
                 {
                     data: 'price',
                     render: function(data, type, row) {
-                        return data + " Kč";
+                        if(row['a_auction_id'] !== null && row['a_auction_id'].length > 0) {
+                            return "Aukce"
+                        } else {
+                            return data + " Kč";
+                        }
                     },
                 },
                 {

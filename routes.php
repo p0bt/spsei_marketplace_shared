@@ -9,6 +9,9 @@ $routes = [
     "/" => "Page:home",
     "/domu" => "Page:home",
     "/mapa" => "Page:map_3d",
+    "/zpravy" => "Chat:index",
+    "/send-message" => "Chat:send_message",
+    "/create-new-chat" => "Chat:create_new_chat",
     "/admin" => "Admin:dashboard",
     "/admin/panel" => "Admin:dashboard",
     "/admin/sprava-uzivatelu" => "Admin:user_maintenance",
@@ -31,6 +34,8 @@ $routes = [
     "/rise-auction-price" => "Auction:rise_price",
     "/can-user-bid" => "Auction:can_user_bid_ajax",
     "/muj-ucet" => "Account:my_account",
+    "/muj-ucet/my-offers" => "Account:tab_my_offers",
+    "/muj-ucet/my-won-auction" => "Account:tab_my_won_auctions",
     "/oblibene" => "Wishlist:wishlist",
     "/add-or-delete-from-wishlist" => "Wishlist:add_or_delete",
     "/nabidky" => "Offer:offers",
@@ -38,6 +43,7 @@ $routes = [
     "/post-offer" => "Offer:post_offer",
     "/detail-nabidky" => "Offer:offer_detail",
     "/api/nabidky" => "Api:offers",
+    "/api/tridy" => "Api:classes",
     "ip-adresa-zablokovana" => "Error:blocked_ip",
 ];
 
@@ -70,9 +76,13 @@ $filters = [
         "/muj-ucet",
         "/nova-nabidka",
         // AJAX + LOGGED IN
-        "/get-auction-current-state",
         "/rise-auction-price",
         "/can-user-bid",
+        "/zpravy",
+        "/send-message",
+        "/create-new-chat",
+        "/muj-ucet/my-offers",
+        "/muj-ucet/my-won-auction",
     ],
     "is_ajax_request" => [
         "/ajax",
@@ -84,6 +94,10 @@ $filters = [
         "/rise-auction-price",
         "/can-user-bid",
         "/admin/get-auctions",
+        "/send-message",
+        "/create-new-chat",
+        "/muj-ucet/my-offers",
+        "/muj-ucet/my-won-auction",
     ],
     "is_cron" => [
         "/cron/delete-old-offers",

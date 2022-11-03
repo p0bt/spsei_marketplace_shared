@@ -1,4 +1,5 @@
 <?php
+namespace SpseiMarketplace\Controllers;
 
 class ErrorController extends BaseController
 {

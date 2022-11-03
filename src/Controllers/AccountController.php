@@ -1,18 +1,96 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Core\Validator;
+use SpseiMarketplace\Core\Database;
+use SpseiMarketplace\Core\HelperFunctions;
+use SpseiMarketplace\Core\Pagination;
+use SpseiMarketplace\Models\Offer;
+use SpseiMarketplace\Models\Auction;
+use SpseiMarketplace\Models\Category;
+use SpseiMarketplace\Models\User;
+use SpseiMarketplace\Models\SchoolClass;
 
 class AccountController extends BaseController
 {
     private $validator;
     private $offers_model;
+    private $auctions_model;
     private $users_model;
     private $classes_model;
+    private $categories_model;
+
+    private $account_data;
 
     public function __construct()
     {
         $this->validator = new Validator();
         $this->offers_model = new Offer();
+        $this->auctions_model = new Auction();
         $this->users_model = new User();
         $this->classes_model = new SchoolClass();
+        $this->categories_model = new Category();
+
+        // Get account info
+        $this->account_data['account'] = $this->users_model->get_by_id($_SESSION['user_data']['user_id']);
+
+        // Bid count
+        $bid_count = Database::query("SELECT COUNT(auction_id) AS 'count' FROM auctions WHERE end_date >= NOW() AND user_id = ?", [$_SESSION['user_data']['user_id']])->countAll();
+
+        // Get offers for my account
+        $this->account_data['offers'] = $this->offers_model->get_from_user($_SESSION['user_data']['user_id'], "date", "DESC");
+        
+        // Get overview info
+        $this->account_data['overview'] = [
+            "offer_count" => $this->offers_model->get_count_from_user($_SESSION['user_data']['user_id']),
+            "auction_count" => count(array_filter($this->account_data['offers'], function($value) {
+                                        return (isset($value['a_auction_id']) && (strlen($value['a_auction_id']) > 0)) ;
+                                    })),
+            "bid_count" => $bid_count,
+            "fav_count" => isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0,
+        ];
+        
+        // Get last 5 offers from wishlist
+        if(isset($_SESSION['wishlist']))
+        {
+            for($i = 0; $i < 5; $i ++)
+            {
+                if(isset($_SESSION['wishlist'][$i]))
+                {
+                    $offer = $this->offers_model->get_by_id($_SESSION['wishlist'][$i]);
+                    if($offer)
+                    {
+                        $name = $offer['name'];
+                    
+                        if(strlen($offer['b_name']) > 0)
+                        {
+                            $name = $offer['b_name'].' ('.$offer['b_author'].')';
+                        }
+                            
+                        $thumbnail = '/assets/images/no_image.png';
+    
+                        if(is_dir(SITE_PATH.'/uploads/'.$offer['image_path']))
+                        {
+                            $images = array_values(array_diff(scandir(SITE_PATH.'/uploads/'.$offer['image_path']), ['.', '..']));
+                            $thumbnail = '/uploads/'.$offer['image_path'].'/'.$images[0];
+                        }
+    
+                        $this->account_data['wishlist'][] = [
+                            "id" => $offer['offer_id'],
+                            "name" => $name,
+                            "thumbnail" => $thumbnail,
+                        ];
+                    }
+                    else
+                    {
+                        unset($_SESSION['wishlist'][$i]);
+                    }
+                }
+            }
+        }
+        // Get classes
+        $this->account_data['classes'] = $this->classes_model->get_all();
+        $this->account_data['categories'] = $this->categories_model->get_all();
     }
 
     public function my_account()
@@ -49,76 +127,44 @@ class AccountController extends BaseController
             }
         }
 
+        $this->render("views/templates/header.php");
+        $this->render("views/account/my_account.php", $this->account_data);
+        $this->render("views/templates/footer.php");
+    }
+
+    public function tab_my_offers()
+    {
         // Read filters
         $this->offers_model->read_filters();
         $tmp_offer_count = $this->offers_model->get_count_from_user($_SESSION['user_data']['user_id']);
 
-        $bid_count = Database::query("SELECT COUNT(auction_id) AS 'count' FROM auctions WHERE end_date >= NOW() AND user_id = ?", [$_SESSION['user_data']['user_id']])->countAll();
-
-        // Get account info
-        $data['account'] = $this->users_model->get_by_id($_SESSION['user_data']['user_id']);
-
-        // Pagination (5 offers per page)
-        $data['pagination'] = new Pagination($tmp_offer_count, "muj-ucet", "p");
-        $data['pagination']->set_items_per_page(5);
-        $this->offers_model->set_limit($data['pagination']->get_limit_a(), $data['pagination']->get_limit_b());
+        // My offers pagination (5 offers per page)
+        $this->account_data['my_offfers_pagination'] = new Pagination($tmp_offer_count, "muj-ucet", "po");
+        $this->account_data['my_offfers_pagination']->set_items_per_page(5);
+        $this->offers_model->set_limit($this->account_data['my_offfers_pagination']->get_limit_a(), $this->account_data['my_offfers_pagination']->get_limit_b());
 
         // Get offers for my account
-        $data['offers'] = $this->offers_model->get_from_user($_SESSION['user_data']['user_id']);
+        $this->account_data['offers'] = $this->offers_model->get_from_user($_SESSION['user_data']['user_id'], "date", "DESC");
 
-        // Get overview info
-        $data['overview'] = [
-            "offer_count" => $tmp_offer_count,
-            "auction_count" => count(array_filter($data['offers'], function($value) {
-                                        return (isset($value['a_auction_id']) && (strlen($value['a_auction_id']) > 0)) ;
-                                    })),
-            "bid_count" => $bid_count,
-            "fav_count" => isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0,
-        ];
-        
-        // Get last 5 offers from wishlist
-        if(isset($_SESSION['wishlist']))
+        $this->render("views/account/my_offers.php", $this->account_data);
+    }
+
+    public function tab_my_won_auctions()
+    {
+        // Get won auctions for my account
+        $won_auctions = $this->auctions_model->get_won_auctions_from_user($_SESSION['user_data']['user_id']);
+        $this->account_data['won_auctions'] = [];
+        foreach($won_auctions as $won_auction)
         {
-            for($i = 0; $i < 5; $i ++)
-            {
-                if(isset($_SESSION['wishlist'][$i]))
-                {
-                    $offer = $this->offers_model->get_by_id($_SESSION['wishlist'][$i]);
-                    if($offer)
-                    {
-                        $name = $offer['name'];
-                    
-                        if(strlen($offer['b_name']) > 0)
-                        {
-                            $name = $offer['b_name'].' ('.$offer['b_author'].')';
-                        }
-                            
-                        $thumbnail = '/assets/images/no_image.png';
-    
-                        if(is_dir(SITE_PATH.'/uploads/'.$offer['image_path']))
-                        {
-                            $images = array_values(array_diff(scandir(SITE_PATH.'/uploads/'.$offer['image_path']), ['.', '..']));
-                            $thumbnail = '/uploads/'.$offer['image_path'].'/'.$images[0];
-                        }
-    
-                        $data['wishlist'][] = [
-                            "id" => $offer['offer_id'],
-                            "name" => $name,
-                            "thumbnail" => $thumbnail,
-                        ];
-                    }
-                    else
-                    {
-                        unset($_SESSION['wishlist'][$i]);
-                    }
-                }
-            }
+            // Lazy for SQL join :D (Sorry for performance impact)
+            $this->account_data['won_auctions'][] = array_merge($won_auction, $this->offers_model->get_by_id($won_auction['offer_id']));
         }
-        // Get classes
-        $data['classes'] = $this->classes_model->get_all();
 
-        $this->render("views/templates/header.php");
-        $this->render("views/account/my_account.php", $data);
-        $this->render("views/templates/footer.php");
+        // Won auctions pagination (5 offers per page)
+        $this->account_data['my_won_auctions_pagination'] = new Pagination(count($this->account_data['won_auctions']), "muj-ucet", "pa");
+        $this->account_data['my_won_auctions_pagination']->set_items_per_page(5);
+        $this->offers_model->set_limit($this->account_data['my_won_auctions_pagination']->get_limit_a(), $this->account_data['my_won_auctions_pagination']->get_limit_b());
+
+        $this->render("views/account/my_won_auctions.php", $this->account_data);
     }
 }

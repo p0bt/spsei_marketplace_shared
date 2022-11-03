@@ -1,3 +1,7 @@
+<?php
+use SpseiMarketplace\Core\HelperFunctions;
+?>
+
 <div class="container-fluid p-0">
     <div class="row g-0">
         <div class="text-left g-0 vh-100 d-flex justify-content-center align-items-center">

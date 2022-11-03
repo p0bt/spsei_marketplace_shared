@@ -42,7 +42,7 @@
                             <tr class="text-center">
                                 <td>
                                     <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>">
-                                        <img src="<?= $thumbnail ?>" class="img-fluid" alt="<?= $name ?>" data-tilt>
+                                        <img src="<?= $thumbnail ?>" class="img-fluid" alt="<?= $name ?>" data-tilt width="100px">
                                     </a>
                                 </td>
                                 <td>

@@ -1,4 +1,5 @@
 <?php
+namespace SpseiMarketplace\Core;
 
 class Router
 {
@@ -77,11 +78,13 @@ class Router
 
     public function call_controller_method($string)
     {
+        $namespace = "SpseiMarketplace\\Controllers\\";
+
         $arr = explode(":", $string);
-        $controller = $arr[0] . "Controller";
+        $controller = $namespace . $arr[0] . "Controller";
         $method = $arr[1];
 
-        require_once("src/Controllers/" . $controller . ".php");
+
         $co = new $controller();
         $co->$method();
     }

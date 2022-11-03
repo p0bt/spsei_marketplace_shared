@@ -1,4 +1,9 @@
 <?php
+namespace SpseiMarketplace\Controllers;
+
+use SpseiMarketplace\Models\Offer;
+use SpseiMarketplace\Models\User;
+use SpseiMarketplace\Models\Auction;
 
 class PageController extends BaseController
 {

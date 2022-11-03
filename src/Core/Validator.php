@@ -1,4 +1,6 @@
 <?php
+namespace SpseiMarketplace\Core;
+
 /**
  * Simple validation class for validating inputs
  * @author Peter Butora

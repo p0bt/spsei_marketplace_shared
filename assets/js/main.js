@@ -19,21 +19,34 @@ function print_auction_info() {
 }
 
 function print_auction_price(price) {
-    $('.auction-price').text("Přihodil/a: " + price + " Kč");
+    $('.auction-price').text("Přihodil/a: " + ((price.length > 0) ? price : "-") + " Kč");
 }
 
 function print_auction_owner(owner) {
     $('.auction-owner').text(owner + " ");
 }
-
+// DELETE BELOW
 function print_auction(auction_id) {
     let state = get_current_state(auction_id);
     if(state.first_name.length > 0 && state.last_name.length > 0)
         print_auction_owner(state.first_name + " " + state.last_name.charAt(0) + ".");
-    else
+    else if(state.user_id.length > 0)
         print_auction_owner("Uživatel č. " + state.user_id);
+    else
+        print_auction_owner("Uživatel č. -");
+
     print_auction_price(state.top_bid);
     print_auction_info();
+}
+
+function print_auction_state(state) {
+    if(state.first_name.length > 0 && state.last_name.length > 0)
+        print_auction_owner(state.first_name + " " + state.last_name.charAt(0) + ".");
+    else if(state.user_id.length > 0)
+        print_auction_owner("Uživatel č. " + state.user_id);
+    else
+        print_auction_owner("Uživatel č. -");
+    print_auction_price(state.top_bid);
 }
 
 function print_current_time() {
@@ -122,6 +135,7 @@ function can_user_bid() {
 }
 
 /* WISHLIST */
+
 function add_to_wishlist() {
     let val = parseInt($(".item-count-box").text()) + 1;
     $(".item-count-box").text(val);
@@ -135,6 +149,7 @@ function delete_from_wishlist() {
 }
 
 /* OTHER FUNCTIONS */
+
 function copy_to_clipboard(value) {
     navigator.clipboard.writeText(value);
 }

@@ -1,4 +1,7 @@
 <?php
+namespace SpseiMarketplace\Core;
+
+use mysqli, mysqli_stmt;
 
 class Database 
 {

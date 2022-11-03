@@ -15,6 +15,12 @@ date_default_timezone_set("Europe/Prague");
 // Site settings
 define("SITE_PATH", __DIR__);
 define("SITE_TITLE", "SPŠEI Marketplace");
+define("SITE_URL", "localhost");
+define("SITE_IP", "127.0.0.1");
+
+// Web sockets
+define("WEBSOCKETS_PORT", 2021);
+define("WEBSOCKETS_PROTOCOL", "http");
 
 // Include path
 set_include_path(SITE_PATH);
@@ -25,7 +31,12 @@ define("DB_username", "root");
 define("DB_password", "");
 define("DB_name", "spsei_marketplace");
 
-// Constants
-define("OFFER_EXPIRATION_DAYS", 31);
-define("AUCTION_BID_DELAY", 10);
-define("SUGGESTIONS_PRICE_TOLERANCE", 1000);
+// --- Constants ---
+
+    // OFFERS
+    define("OFFER_EXPIRATION_DAYS", 31);
+    define("MAX_OFFER_PRICE", 1500);
+    define("SUGGESTIONS_PRICE_TOLERANCE", 1000);
+
+    // AUCTIONS
+    define("AUCTION_BID_DELAY", 10);

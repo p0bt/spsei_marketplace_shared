@@ -11,6 +11,7 @@
                     <tr>
                         <th>Název knihy</th>
                         <th>Autor</th>
+                        <th>Kategorie</th>
                         <th>Akce</th>
                     </tr>
                 </thead>
@@ -25,12 +26,24 @@
             <h3>Přidání nové knihy</h3>
             <form method="POST" action="">
                 <div class="mb-3">
+                    <label for="isbn" class="form-label">ISBN</label>
+                    <input type="text" class="form-control" name="isbn" id="isbn" autocomplete="off" required maxlength="13">
+                </div>
+                <div class="mb-3">
                     <label for="name" class="form-label">Název knihy</label>
                     <input type="text" class="form-control" name="name" id="name" autocomplete="off" required maxlength="50">
                 </div>
                 <div class="mb-3">
                     <label for="author" class="form-label">Autor</label>
                     <input type="text" class="form-control" name="author" id="author" autocomplete="off" required maxlength="50">
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Kategorie</label>
+                    <select name="category" class="form-control" id="category">
+                        <?php foreach($categories as $category): ?>
+                            <option value="<?= $category['category_id'] ?>"><?= $category['name'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-success">Odeslat</button>
             </form>
@@ -46,13 +59,16 @@
             order: [[1, "desc"]],
             columns: [
                 {
-                    data: 'name',
+                    data: 'b_name',
                 },
                 {
-                    data: 'author',
+                    data: 'b_author',
                 },
                 {
-                    data: 'book_id',
+                    data: 'c_name',
+                },
+                {
+                    data: 'b_book_ISBN',
                     render: function(data, type, row) {
                         let render = '<a type="button" href="/admin/sprava-knih?delete=' + data + '" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></a>';
                         return render;
