@@ -5,9 +5,26 @@ use mysqli, mysqli_stmt;
 
 class Database 
 {
-    public static function getConnection()
+    private $conn;
+
+    public function __construct()
+    {
+        $this->conn = self::get_new_connection();
+    }
+
+    public function get_connection()
+    {
+        return $this->conn;
+    }
+
+    public static function get_new_connection()
     {
         return new mysqli(DB_hostname, DB_username, DB_password, DB_name);
+    }
+
+    public function get_last_inserted_id()
+    {
+        return $this->conn->insert_id;
     }
 
     /**
@@ -16,9 +33,9 @@ class Database
      * @param array $binds
      * @return QueryResult|false
      */
-    public static function query($sql, $binds = null, $escape = true)
+    public function query($sql, $binds = null, $escape = true)
     {
-        $db = Database::getConnection();
+        $db = $this->get_connection();
         $stmt = new mysqli_stmt($db, $sql);
         $types = '';
 
@@ -51,7 +68,7 @@ class Database
      * @param array $sql
      * @return string joined sql
      */
-    public static function join_sql($sql)
+    public function join_sql($sql)
     {
         if(!empty($sql))
         {

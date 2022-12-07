@@ -48,6 +48,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                 </div>
             </div>
             <div class="row mt-5 g-0">
+                <a href="/muj-ucet?t=my-offers" class="btn btn-primary text-uppercase rounded-0">Obnovit</a>
                 <button type="submit" class="btn btn-secondary text-uppercase rounded-0">Filtrovat</button>
             </div>
         </div>

@@ -5,6 +5,7 @@
     "in_list": "Neplatná volba",
     "matches": "Položka se musí shodovat",
     "is_unique": "Záznam pro tuto položku již existuje",
+    "is_not_unique": "Záznam pro tuto položku neexistuje",
     "is_valid_email": "Neplatný email",
     "is_valid_number": "Položka nemá formát čísla",
     "greather_than": "Položka musí mít větší hodnotu",

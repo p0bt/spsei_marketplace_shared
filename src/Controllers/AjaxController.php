@@ -7,23 +7,28 @@ use SpseiMarketplace\Core\Filter;
 
 class AjaxController extends BaseController
 {
+    private $db;
+    
+    private $validator;
+
     public function __construct()
     {
         if(!Filter::is_ajax_request()) 
             die;
 
+        $this->db = new Database();
         $this->validator = new Validator();
     }
 
     public function process_list()
     {
         if(!Filter::is_admin()) die;
-        echo json_encode(Database::query("SHOW FULL PROCESSLIST")->getResultArray());
+        echo json_encode($this->db->query("SHOW FULL PROCESSLIST")->getResultArray());
     }
 
     public function auction_current_price()
     {
-        echo json_encode(Database::query("SELECT `top_bid` FROM `auctions` WHERE `auction_id` = ?", [$_POST['auction_id']]));
+        echo json_encode($this->db->query("SELECT `top_bid` FROM `auctions` WHERE `auction_id` = ?", [$_POST['auction_id']]));
     }
 
     public function send_email()

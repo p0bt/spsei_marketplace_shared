@@ -7,6 +7,9 @@
             <li class="nav-item">
                 <a class="nav-link link-tabs" href="javascript:void(0)" data-link="my-won-auction">Moje vyhrané aukce</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link link-tabs" href="javascript:void(0)" data-link="wishlist">Oblíbené nabídky</a>
+            </li>
         </ul>
     </nav>
     <hr>

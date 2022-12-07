@@ -1,5 +1,4 @@
 <?php
-
 use SpseiMarketplace\Core\HelperFunctions;
 ?>
 
@@ -17,87 +16,18 @@ use SpseiMarketplace\Core\HelperFunctions;
 
 <div class="container-fluid">
     <div class="row min-vh-100">
-        <div class="col-lg-3 col-md-4 d-md-block d-none shadow p-4 gx-5" id="filters-col">
-            <h3>Filtry</h3>
-            <form action="" method="GET">
-                <div id="filter-inputs">
-                    <div class="row my-5">
-                        <div class="col-12">
-                            <h5>Vyhledávání</h5>
-                            <div class="input-group rounded">
-                                <input type="text" name="search" value="<?= HelperFunctions::setInputValue("search") ?>" class="form-control border-right-0 rounded-0" placeholder="Název produktu" aria-label="Search" aria-describedby="search-addon">
-                                <button type="submit" class="border-0">
-                                    <span class="input-group-text border-0 rounded-0" id="search-addon">
-                                        <i class="fa fa-search"></i>
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row my-5">
-                        <div class="col-12">
-                            <h5>Cena / Typ</h5>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="price_type" id="price-radio-vse" value="vse" <?= HelperFunctions::setRadio("price_type", "vse") ?> required <?= (!isset($_POST['price_type'])) ? "checked" : "" ?>>
-                                <label class="form-check-label" for="price-radio-vse">
-                                    <div>Vše</div>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="price_type" id="price-radio-pevna" value="pevna" <?= HelperFunctions::setRadio("price_type", "pevna") ?>>
-                                <label class="form-check-label" for="price-radio-pevna">
-                                    <div>Pevná</div>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="price_type" id="price-radio-aukce" value="aukce" <?= HelperFunctions::setRadio("price_type", "aukce") ?>>
-                                <label class="form-check-label" for="price-radio-aukce">
-                                    <div>Aukce</div>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="price_type" id="price-radio-zdarma" value="zdarma" <?= HelperFunctions::setRadio("price_type", "zdarma") ?>>
-                                <label class="form-check-label" for="price-radio-zdarma">
-                                    <div>Zdarma</div>
-                                </label>
-                            </div>
-                            <div id="price-filter">
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row my-5">
-                        <h5>Kategorie</h5>
-                        <div class="col-12">
-                            <?php foreach ($categories as $category) : ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="category[]" id="category-radio-<?= $category['value'] ?>" value="<?= $category['value'] ?>" <?= HelperFunctions::setCheckbox("category", $category['value']) ?>>
-                                    <label class="form-check-label" for="category-radio-<?= $category['value'] ?>">
-                                        <?= $category['name'] ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                </div>
-                <div class="row my-5">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-end">
-                            <a type="button" class="btn btn-light text-uppercase me-1" href="/nabidky">Obnovit</a>
-                            <button type="submit" class="btn btn-primary text-uppercase">Filtrovat</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+        <?php require_once("views/templates/offers/filters_panel.php") ?>
         <div class="col-lg-9 col-md-8 col-12 gx-5">
+            <?php if (!isset($_SESSION['user_data'])) : ?>
+                <div class="row my-2">
+                    <div class="alert alert-info">
+                        Tip: Pro rychlejší hledání učebnic dle tvých požadavků se přihlaš
+                    </div>
+                </div>
+            <?php endif; ?>
             <div class="row my-md-3 mt-3 mb-5">
                 <div class="col-12">
                     <?php
-                    $allowed_display = [
-                        "list",
-                        "grid",
-                    ];
                     // Default display method is list
                     if (isset($_GET['d']) && in_array($_GET['d'], $allowed_display))
                         $display = $_GET['d'];
@@ -137,81 +67,9 @@ use SpseiMarketplace\Core\HelperFunctions;
                         }
                         ?>
                         <?php if ($display == "list") : ?>
-                            <div class="row">
-                                <div class="col-md-2 col-6 text-center">
-                                    <img src="<?= $thumbnail ?>" class="img-fluid" alt="<?= $name ?>" data-tilt>
-                                </div>
-                                <div class="col-md-6 col-6 d-flex justify-content-center align-items-center text-center">
-                                    <div>
-                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="text-decoration-none text-dark">
-                                            <h5 class="card-title">
-                                                <?= $name ?>
-                                            </h5>
-                                        </a>
-                                        <?= substr($offer['description'], 0, 30) ?>...
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-6 d-flex justify-content-center align-items-center">
-                                    <?php if (isset($offer['a_start_date']) && isset($offer['a_end_date']) && !empty($offer['a_start_date']) && !empty($offer['a_end_date'])) : ?>
-                                        <div class="auction">
-                                            <div class="auction-info fw-bold"></div>
-                                            <div class="auction-start-date" data-date="<?= $offer['a_start_date'] ?>"></div>
-                                            <div class="auction-end-date" data-date="<?= $offer['a_end_date'] ?>"></div>
-                                        </div>
-                                    <?php else: ?>
-                                        <?= $offer['price'] == 0 ? "Zdarma" : $offer['price']." Kč" ?>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="col-md-2 col-6 d-flex justify-content-center align-items-center">
-                                    <div class="d-flex flex-wrap text-center justify-content-center align-items-center">
-                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="btn btn-primary w-md-100">Podrobnosti</a>
-                                        <?php if (isset($_SESSION['user_data']['user_id']) && ($_SESSION['user_data']['user_id'] != $offer['user_id'])) : ?>
-                                            <a href="javascript:void(0);" class="w-md-100 btn-add-offer-to-wishlist mx-2" data-id="<?= $offer['offer_id'] ?>"><i class="fa-solid fa-heart" style="color: <?= (isset($_SESSION['wishlist']) && in_array($offer['offer_id'], $_SESSION['wishlist'])) ? "red" : "black" ?>;"></i></a>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <hr class="w-100 light">
-                                </div>
-                            </div>
+                            <?php require("views/templates/offers/offer_display_list.php") ?>
                         <?php elseif ($display == "grid") : ?>
-                            <div class="col-xl-4 col-md-6 col-12">
-                                <div class="card card-card mb-md-0 mb-5">
-                                    <img src="<?= $thumbnail ?>" class="card-img-top" alt="<?= $name ?>" data-tilt>
-                                    <div class="card-body">
-                                        <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="text-decoration-none text-dark">
-                                            <h5 class="card-title">
-                                                <?= $name ?>
-                                            </h5>
-                                        </a>
-                                        <div class="card-text">
-                                            <div class="small">
-                                                <b>Kategorie: <?= $offer['cat_name'] ?></b>
-                                            </div>
-                                            <div>
-                                                <?php if (isset($offer['a_start_date']) && isset($offer['a_end_date']) && !empty($offer['a_start_date']) && !empty($offer['a_end_date'])) : ?>
-                                                    <div class="auction-info fw-bold"></div>
-                                                    <div class="auction-start-date" data-date="<?= $offer['a_start_date'] ?>"></div>
-                                                    <div class="auction-end-date" data-date="<?= $offer['a_end_date'] ?>"></div>
-                                                <?php elseif (isset($offer['price']) && !empty($offer['price'])) : ?>
-                                                    <em>Cena: <?= $offer['price'] ?> Kč</em>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="pt-2">
-                                                <?= substr($offer['description'], 0, 30) ?>...
-                                            </div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="detail-nabidky?id=<?= $offer['offer_id'] ?>" class="btn btn-primary mt-2">Podrobnosti</a>
-                                            <?php if (isset($_SESSION['user_data']['user_id']) && ($_SESSION['user_data']['user_id'] != $offer['user_id'])) : ?>
-                                                <a href="javascript:void(0);" class="w-md-100 btn-add-offer-to-wishlist mx-2" data-id="<?= $offer['offer_id'] ?>"><i class="fa-solid fa-heart" style="color: <?= (isset($_SESSION['wishlist']) && in_array($offer['offer_id'], $_SESSION['wishlist'])) ? "red" : "black" ?>;"></i></a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php require("views/templates/offers/offer_display_grid.php") ?>
                         <?php endif; ?>
                     <?php endforeach; ?>
                     <?php if ($display == "grid") : ?>
@@ -232,24 +90,7 @@ use SpseiMarketplace\Core\HelperFunctions;
 </div>
 
 <!-- Product filter modal for small devices -->
-<form action="" method="GET">
-    <div class="modal fade" id="filter-modal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Filtry</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body px-5 pb-5">
-                </div>
-                <div class="modal-footer p-0">
-                    <a type="button" class="btn btn-light text-uppercase me-1" href="/nabidky">Obnovit</a>
-                    <button type="submit" class="btn btn-primary">Filtrovat</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
+<?php require_once("views/templates/offers/filters_panel_modal.php") ?>
 
 <script>
     function init_slider() {

@@ -17,7 +17,7 @@ class WishlistController extends BaseController
         $this->create_basket();
     }
 
-    public function wishlist()
+    public function tab_wishlist()
     {
         $data['wishlist_items'] = [];
         $data['suggestions']["offers"] = [];
@@ -86,26 +86,28 @@ class WishlistController extends BaseController
             }
         }
 
-        $this->render("views/templates/header.php");
         $this->render("views/account/wish_list.php", $data);
-        $this->render("views/templates/footer.php");
     }
-
+    
     public function add_or_delete()
     {
         if($_POST && Filter::is_ajax_request())
         {
+            $offer_id = $_POST['offer_id'];
+
             $this->validator->addMultipleRules([
                 'offer_id' => 'is_not_unique[offers.offer_id]',
             ]);
             if($this->validator->run() && !$this->offers_model->is_mine($_SESSION['user_data']['user_id'], $_POST['offer_id']))
             {
-                $offer_id = $_POST['offer_id'];
-
                 if(in_array($offer_id, $_SESSION['wishlist']))
                     $this->delete($offer_id);
                 else
                     $this->add($offer_id);
+            } // If offer doesn't exist anymore -> delete it from wishlist
+            else 
+            {
+                $this->delete($offer_id);
             }
         }
     }

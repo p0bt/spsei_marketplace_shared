@@ -64,6 +64,28 @@ class HelperFunctions
     }
 
     /**
+     * Set select option to selected if condition matched
+     * @param string $input_name name of the select
+     * @return string 'selected' or empty '' string
+     */
+    public static function setSelect($input_name, $input_value)
+    {
+        if(isset($_POST[$input_name]))
+        {
+            if($_POST[$input_name] == $input_value)
+                return 'selected';
+        }
+        if(isset($_GET[$input_name]))
+        {
+            //echo "<script>console.log('GET:".$_GET[$input_name]."')</script>";
+            //echo "<script>console.log('VAL:".$input_value."')</script>";
+            if($_GET[$input_name] == $input_value)
+                return 'selected';
+        }
+        return '';
+    }
+
+    /**
      * Set alert
      * @param string $type type of alert (danger, success...)
      * @param string $message

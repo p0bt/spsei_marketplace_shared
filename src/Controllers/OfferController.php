@@ -3,13 +3,14 @@ namespace SpseiMarketplace\Controllers;
 
 use Exception;
 use SpseiMarketplace\Core\Validator;
-use SpseiMarketplace\Core\Database;
 use SpseiMarketplace\Core\HelperFunctions;
 use SpseiMarketplace\Core\Pagination;
 use SpseiMarketplace\Models\Offer;
 use SpseiMarketplace\Models\Book;
 use SpseiMarketplace\Models\Auction;
 use SpseiMarketplace\Models\Category;
+use SpseiMarketplace\Models\Major;
+use SpseiMarketplace\Models\Notebook;
 
 class OfferController extends BaseController
 {
@@ -17,6 +18,8 @@ class OfferController extends BaseController
     private $offers_model;
     private $books_model;
     private $category_model;
+    private $majors_model;
+    private $notebooks_model;
 
     public function __construct()
     {
@@ -25,11 +28,20 @@ class OfferController extends BaseController
         $this->auctions_model = new Auction();
         $this->books_model = new Book();
         $this->category_model = new Category();
+        $this->majors_model = new Major();
+        $this->notebooks_model = new Notebook();
     }
 
     public function offers()
     {
         $this->offers_model->read_filters();
+
+        $data['allowed_display'] = [
+            "list",
+            "grid",
+        ];
+
+        $data['majors'] = $this->majors_model->get_all();
 
         $data['categories'] = $this->category_model->get_all();
     
@@ -78,6 +90,9 @@ class OfferController extends BaseController
                         case 4:
                             $this->validator->addMultipleRules([
                                 'name' => 'required|min_length[3]|max_length[50]',
+                                // Grade 0 = All grades
+                                'grade' => 'required|in_list[0,1,2,3,4]',
+                                'major' => 'required|is_not_unique[majors.major_id]',
                             ]);
                             break;
                     }
@@ -100,12 +115,24 @@ class OfferController extends BaseController
                     }
                     if ($this->validator->run()) 
                     {
+                        $notebook_id = null;
+                        $name = $_POST['name'];
+                        $book_ISBN = $name;
+
+                        if(intval($_POST['category']) == 4) {
+                            $notebook_id = $this->notebooks_model->post([
+                                'name' => $name,
+                                'grade' => $_POST['grade'], 
+                                'major_id' => $_POST['major'],
+                            ]);
+                            $book_ISBN = null;
+                        }
+
                         $post_data = [
                             'user_id' => $_SESSION['user_data']['user_id'],
-                            'name' => (intval($_POST['name']) != 0) ? null : $_POST['name'],
+                            'notebook_id' => $notebook_id,
+                            'book_ISBN' => $book_ISBN,
                             'description' => $_POST['description'],
-                            'book_ISBN' => (intval($_POST['name']) != 0) ? $_POST['name'] : null,
-                            'category_id' => $_POST['category'],
                             'price' => $price,
                             'image_path' => "offer_u".$_SESSION['user_data']['user_id']."_".uniqid(),
                         ];
@@ -123,9 +150,9 @@ class OfferController extends BaseController
                             "success" => true,
                             "text" => "Nabídka byla zveřejněna",
                         ];
-                        $this->offers_model->post($post_data);
-                        // Change line below to something standard
-                        $offer_id = Database::query("SELECT MAX(offer_id) AS 'id' FROM offers;")->getRowArray()['id'];
+
+                        // Post new offer, and get it's offer_id
+                        $offer_id = $this->offers_model->post($post_data);
 
                         if($_POST['price_type'] == "aukce")
                         {
@@ -173,6 +200,7 @@ class OfferController extends BaseController
         ];
 
         $data['categories'] = $this->category_model->get_all();
+        $data['majors'] = $this->majors_model->get_all();
 
         $this->render("views/templates/header.php");
         $this->render("views/offers/new_offer.php", $data);

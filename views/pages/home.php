@@ -36,10 +36,10 @@
 <div class="container min-vh-100">
     <div class="row mt-5 text-center text-white" style="height: 100px; color: white !important;">
         <div class="col-lg-11 col-10 h-100 banner-gradient">
-            <h3 class="d-flex h-100 justify-content-center align-items-center">3D mapa s nabídkami</h3>
+            <h3 class="d-flex h-100 justify-content-center align-items-center">3D nabídky</h3>
         </div>
         <div class="col-lg-1 col-2 h-100 banner-gradient border-start border-white border-3">
-            <a href="/mapa" class="d-flex h-100 justify-content-center align-items-center text-white text-decoration-none"><i class="fa-solid fa-maximize" style="font-size: 24px;"></i></a>
+            <a href="/3d" class="d-flex h-100 justify-content-center align-items-center text-white text-decoration-none"><i class="fa-solid fa-maximize" style="font-size: 24px;"></i></a>
         </div>
     </div>
     <div class="row">
@@ -49,24 +49,42 @@
     </div>
     <div class="row my-5 text-white text-center fw-bold display-6">
         <div class="col-4">
-            <a href="/nabidky?category%5B%5D=ucebnice" class="text-white text-decoration-none grey-filter">
-                <div style="background-color: darkseagreen;" data-aos="zoom-in-right">
-                    <img src="/assets/images/book_icon.png" alt="Učebnice" class="w-100">
-                    <p class="text-over-image text-over-image-center">Učebnice</p>
+            <a href="/nabidky?search=&price_type=vse&category%5B%5D=povinne_ucebnice" class="text-white text-decoration-none grey-filter">
+                <div style="background-color: khaki;" data-aos="zoom-in-right">
+                    <img src="/assets/images/book_icon_1.png" alt="Učebnice" class="w-100">
+                    <p class="text-over-image text-over-image-center">Povinné Učebnice</p>
                 </div>
             </a>
         </div>
         <div class="col-4">
-            <a href="/nabidky?category%5B%5D=sesity" class="text-white text-decoration-none grey-filter">
+            <a href="/nabidky?search=&price_type=vse&category%5B%5D=doporucene_ucebnice" class="text-white text-decoration-none grey-filter">
                 <div style="background-color: khaki;" data-aos="zoom-in-up" data-aos-delay="300">
-                    <img src="/assets/images/notebook_icon.png" alt="Sešity" class="w-100">
+                    <img src="/assets/images/book_icon_2.png" alt="Sešity" class="w-100">
+                    <p class="text-over-image text-over-image-center">Doporučené Učebnice</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-4">
+            <a href="/nabidky?search=&price_type=vse&category%5B%5D=povinna_cetba" class="text-white text-decoration-none grey-filter">
+                <div style="background-color:khaki;" data-aos="zoom-in-left" data-aos-delay="600">
+                    <img src="/assets/images/books_mandatory.png" alt="Vše" class="w-100">
+                    <p class="text-over-image text-over-image-center">Povinná Četba</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="row my-5 justify-content-center text-white text-center fw-bold display-6">
+        <div class="col-4">
+            <a href="/nabidky?search=&price_type=vse&category%5B%5D=sesity" class="text-white text-decoration-none grey-filter">
+                <div style="background-color: moccasin;" data-aos="zoom-in-left" data-aos-delay="900">
+                    <img src="/assets/images/notebook_icon.png" alt="Vše" class="w-100">
                     <p class="text-over-image text-over-image-center">Sešity</p>
                 </div>
             </a>
         </div>
         <div class="col-4">
             <a href="/nabidky" class="text-white text-decoration-none grey-filter">
-                <div style="background-color: moccasin;" data-aos="zoom-in-left" data-aos-delay="600">
+                <div style="background-color: moccasin;" data-aos="zoom-in-left" data-aos-delay="1200">
                     <img src="/assets/images/notebook_book_icon.png" alt="Vše" class="w-100">
                     <p class="text-over-image text-over-image-center">Vše</p>
                 </div>

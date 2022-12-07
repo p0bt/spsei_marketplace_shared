@@ -28,7 +28,8 @@ class Filter
 
     public static function is_banned()
     {
-        $result = Database::query("SELECT bi_id FROM `banned_ips` WHERE `ip_address` = ?", [HelperFunctions::getClientIp()])->getRowArray();
+        $db = new Database();
+        $result = $db->query("SELECT bi_id FROM `banned_ips` WHERE `ip_address` = ?", [HelperFunctions::getClientIp()])->getRowArray();
         return is_array($result);
     }
 }

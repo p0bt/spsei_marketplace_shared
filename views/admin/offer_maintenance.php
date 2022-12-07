@@ -30,6 +30,7 @@
 <script>
     $(document).ready(function() {
         let data = <?= json_encode($offers) ?>;
+        console.log(data);
         let dataTable = $("#offers-table").DataTable({
             data: data,
             order: [[6, "desc"]],
@@ -55,6 +56,11 @@
                 {
                     data: 'cat_name',
                     className: "text-center",
+                    render: function(data, type, row) {
+                        if(data == null || data == "")
+                            return "Sešity";
+                        return data;
+                    },
                 },
                 {
                     data: 'price',

@@ -1,8 +1,6 @@
 <?php
 namespace SpseiMarketplace\Models;
 
-use SpseiMarketplace\Core\Database;
-
 class Offer extends BaseModel
 {
     private $filters = "";
@@ -12,6 +10,8 @@ class Offer extends BaseModel
         'price',
         'category',
         'price_type',
+        'major',
+        'grade',
     ];
     private $sql = [];
 
@@ -50,12 +50,12 @@ class Offer extends BaseModel
         if(isset($categories) && !empty($categories))
             $this->set_categories($categories);
 
-        $this->filters = Database::join_sql($this->sql);
+        $this->filters = $this->db->join_sql($this->sql);
     }
 
     public function set_search($search)
     {
-        $this->sql[] = "`b`.`book_ISBN` LIKE '%".$search."%' OR `b`.`name` LIKE '%".$search."%' OR `b`.`author` LIKE '%".$search."%' OR `o`.`name` LIKE '%".$search."%' OR `description` LIKE '%".$search."%'";
+        $this->sql[] = "`b`.`book_ISBN` LIKE '%".$search."%' OR `b`.`name` LIKE '%".$search."%' OR `b`.`author` LIKE '%".$search."%' OR `nb`.`name` LIKE '%".$search."%' OR `description` LIKE '%".$search."%'";
     }
 
     public function set_price($price_type, $price)
@@ -91,7 +91,24 @@ class Offer extends BaseModel
         $categories = implode(",", (array_map(function($value) {
             return "'$value'";
         }, $categories)));
-        $this->sql[] = "`cat`.`value` IN (".$categories.")";
+        $sql = "`cat`.`value` IN (".$categories.")";
+
+        if(in_array("'sesity'", explode(",", $categories)))
+            $sql .= " OR `cat`.`value` IS NULL";
+
+        $this->sql[] = $sql;
+    }
+
+    public function set_major($major)
+    {
+        if($major != 3) // All majors
+            $this->sql[] = "`b`.`major_id` = ".$major." OR `nb`.`major_id` = ".$major;
+    }
+
+    public function set_grade($grade)
+    {
+        if($grade != 0) // All grades
+            $this->sql[] = "`b`.`grade` = ".$grade." OR `nb`.`grade` = ".$grade;
     }
 
     public function read_filters()
@@ -116,36 +133,46 @@ class Offer extends BaseModel
             if(isset($_GET['category']) && !empty($_GET['category']))
                 $this->set_categories($_GET['category']);
 
+            // Set major
+            if(isset($_GET['major']) && !empty($_GET['major']))
+                $this->set_major($_GET['major']);
+
+            // Set grade
+            if(isset($_GET['grade']) && !empty($_GET['grade']))
+                $this->set_grade($_GET['grade']);
+
             // Prepare sql
-            $this->filters = Database::join_sql($this->sql);
+            $this->filters = $this->db->join_sql($this->sql);
         }
     }
 
     public function post($data)
     {
-        Database::query("INSERT INTO `offers` 
-                        (`user_id`, `name`, `description`, `book_ISBN`, `category_id`, `price`, `image_path`)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                        [$data['user_id'], $data['name'], $data['description'], $data['book_ISBN'], $data['category_id'], $data['price'], $data['image_path']]);
+        $this->db->query("INSERT INTO `offers` 
+                        (`user_id`, `notebook_id`, `book_ISBN`, `description`, `price`, `image_path`)
+                        VALUES (?, ?, ?, ?, ?, ?)", 
+                        [$data['user_id'], $data['notebook_id'], $data['book_ISBN'], $data['description'], $data['price'], $data['image_path']]);
+        
+        return $this->db->get_last_inserted_id();
     }
 
     public function delete_by_id($offer_id)
     {
-        Database::query("DELETE FROM `offers` 
+        $this->db->query("DELETE FROM `offers` 
                         WHERE `offer_id` = ?", 
                         [$offer_id]);
     }
 
     public function delete($user_id, $offer_id)
     {
-        Database::query("DELETE FROM `offers` 
+        $this->db->query("DELETE FROM `offers` 
                         WHERE `user_id` = ? AND `offer_id` = ?", 
                         [$user_id, $offer_id]);
     }
 
     public function is_mine($user_id, $offer_id)
     {
-        $result = Database::query("SELECT offer_id 
+        $result = $this->db->query("SELECT offer_id 
                                 FROM `offers` 
                                 WHERE `user_id` = ? AND `offer_id` = ?", 
                                 [$user_id, $offer_id])->getRowArray();
@@ -154,11 +181,12 @@ class Offer extends BaseModel
 
     public function get_all($order_by = null, $order = null)
     {
-        $sql = "SELECT o.*, a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
+        $sql = "SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
                 FROM `offers` `o` 
-                LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
+                LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN`
+                LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
                 LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                INNER JOIN `categories` `cat` ON `o`.`category_id` = `cat`.`category_id`".((isset($this->filters) && strlen($this->filters) > 0) ? " WHERE".$this->filters : "");
+                LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id`".((isset($this->filters) && strlen($this->filters) > 0) ? " WHERE".$this->filters : "");
         
         if(isset($order_by) && isset($order))
         {
@@ -174,48 +202,51 @@ class Offer extends BaseModel
             }
         }
         $sql .= (isset($this->limit_a) && isset($this->limit_b)) ? (" LIMIT ".$this->limit_a.", ".$this->limit_b) : ("");
-        return Database::query($sql)->getResultArray();
+        return $this->db->query($sql)->getResultArray();
     }
 
     public function delete_old()
     {
         $old_timestamp = time() - (OFFER_EXPIRATION_DAYS * 86400);
-        return Database::query("DELETE FROM `offers` 
+        return $this->db->query("DELETE FROM `offers` 
                                 WHERE UNIX_TIMESTAMP(`date`) <= ?",
                                 [$old_timestamp]);
     }
 
     public function get_all_with_user_info()
     {
-        $sql = "SELECT o.*, a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.email AS 'email', u.first_name AS 'first_name', u.last_name AS 'last_name', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', c.name AS 'c_name', cat.name AS 'cat_name', cat.value AS 'cat_value'  
+        $sql = "SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.email AS 'email', u.first_name AS 'first_name', u.last_name AS 'last_name', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', c.name AS 'c_name', cat.name AS 'cat_name', cat.value AS 'cat_value'  
                 FROM `offers` `o` 
                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
-                LEFT JOIN `users` `u` ON `u`.`user_id` = `o`.`user_id` 
+                LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
+                INNER JOIN `users` `u` ON `u`.`user_id` = `o`.`user_id` 
                 LEFT JOIN `classes` `c` ON `c`.`class_id` = `u`.`class_id` 
                 LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                INNER JOIN `categories` `cat` ON `o`.`category_id` = `cat`.`category_id`";
-        return Database::query($sql)->getResultArray();
+                LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id`";
+        return $this->db->query($sql)->getResultArray();
     }
 
     public function get_by_id($offer_id)
     {
-        return Database::query("SELECT o.*, a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.*, b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
+        return $this->db->query("SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.*, b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
                                 FROM `offers` `o` 
                                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
-                                LEFT JOIN `users` `u` ON `u`.`user_id` = `o`.`user_id` 
+                                LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
+                                INNER JOIN `users` `u` ON `u`.`user_id` = `o`.`user_id` 
                                 LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                                INNER JOIN `categories` `cat` ON `o`.`category_id` = `cat`.`category_id` 
+                                LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id` 
                                 WHERE `o`.`offer_id` = ?", 
                                 [$offer_id])->getRowArray();
     }
 
     public function get_from_user($user_id, $order_by = null, $order = null)
     {
-        $sql = "SELECT o.*, a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
+        $sql = "SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
                 FROM `offers` `o` 
                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
+                LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
                 LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                INNER JOIN `categories` `cat` ON `o`.`category_id` = `cat`.`category_id` 
+                LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id` 
                 WHERE `o`.`user_id` = ?".((isset($this->filters) && strlen($this->filters) > 0) ? " AND".$this->filters : "");
                 
         if(isset($order_by) && isset($order))
@@ -233,17 +264,18 @@ class Offer extends BaseModel
         }
         
         $sql .= (isset($this->limit_a) && isset($this->limit_b)) ? (" LIMIT ".$this->limit_a.", ".$this->limit_b) : ("");
-        return Database::query($sql, [$user_id])->getResultArray();
+        return $this->db->query($sql, [$user_id])->getResultArray();
     }
 
     public function get_count()
     {
         $sql = "SELECT o.offer_id 
                 FROM `offers` `o` 
-                LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
+                LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN`
+                LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
                 LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                INNER JOIN `categories` `cat` ON `o`.`category_id` = `cat`.`category_id`".((isset($this->filters) && strlen($this->filters) > 0) ? " WHERE".$this->filters : "");
-        return Database::query($sql)->countAll();
+                LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id`".((isset($this->filters) && strlen($this->filters) > 0) ? " WHERE".$this->filters : "");
+        return $this->db->query($sql)->countAll();
     }
 
     public function get_count_from_user($user_id)
@@ -251,16 +283,17 @@ class Offer extends BaseModel
         $sql = "SELECT o.offer_id 
                 FROM `offers` `o` 
                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
+                LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
                 LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                INNER JOIN `categories` `cat` ON `o`.`category_id` = `cat`.`category_id` 
+                LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id` 
                 WHERE `o`.`user_id` = ?".((isset($this->filters) && strlen($this->filters) > 0) ? " AND".$this->filters : "");
-        return Database::query($sql, [$user_id])->countAll();
+        return $this->db->query($sql, [$user_id])->countAll();
     }
 
 
     public function get_most_expensive()
     {
-        return Database::query("SELECT MAX(`price`) AS 'price' 
+        return $this->db->query("SELECT MAX(`price`) AS 'price' 
                                 FROM `offers`")->getRowArray()['price'];
     }
 }

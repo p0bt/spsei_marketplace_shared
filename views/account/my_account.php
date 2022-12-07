@@ -13,7 +13,10 @@
 
 <script>
     $(document).ready(function() {
-        load_tab($(".link-tabs").data('link'));
+        let default_tab = "<?= (isset($_GET['t']) && !empty($_GET['t'])) ? $_GET['t'] : 'my-offers' ?>";
+        load_tab(default_tab);
+        $(".link-tabs").removeClass("active text-primary");
+        $("a[data-link='" + default_tab + "'").addClass("active text-primary");
 
         $(".link-tabs").click(function() {
             $(".link-tabs").removeClass("active text-primary");

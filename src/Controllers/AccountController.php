@@ -13,6 +13,8 @@ use SpseiMarketplace\Models\SchoolClass;
 
 class AccountController extends BaseController
 {
+    private $db;
+
     private $validator;
     private $offers_model;
     private $auctions_model;
@@ -24,6 +26,8 @@ class AccountController extends BaseController
 
     public function __construct()
     {
+        $this->db = new Database();
+
         $this->validator = new Validator();
         $this->offers_model = new Offer();
         $this->auctions_model = new Auction();
@@ -35,7 +39,7 @@ class AccountController extends BaseController
         $this->account_data['account'] = $this->users_model->get_by_id($_SESSION['user_data']['user_id']);
 
         // Bid count
-        $bid_count = Database::query("SELECT COUNT(auction_id) AS 'count' FROM auctions WHERE end_date >= NOW() AND user_id = ?", [$_SESSION['user_data']['user_id']])->countAll();
+        $bid_count = $this->db->query("SELECT COUNT(auction_id) AS 'count' FROM auctions WHERE end_date >= NOW() AND user_id = ?", [$_SESSION['user_data']['user_id']])->countAll();
 
         // Get offers for my account
         $this->account_data['offers'] = $this->offers_model->get_from_user($_SESSION['user_data']['user_id'], "date", "DESC");
@@ -108,8 +112,8 @@ class AccountController extends BaseController
                 ]);
                 if ($this->validator->run())
                 {
-                    Database::query("UPDATE `users` SET `first_name` = ?, `last_name` = ?, `class_id` = ?, `last_update` = ? WHERE `user_id` = ?", [$_POST['first_name'], $_POST['last_name'], $_POST['class'], date('Y-m-d H:i:s', time()), $account['user_id']]);
-                    $account = Database::query("SELECT * FROM `users` WHERE `user_id` = ?", [$_SESSION['user_data']['user_id']])->getRowArray();
+                    $this->db->query("UPDATE `users` SET `first_name` = ?, `last_name` = ?, `class_id` = ?, `last_update` = ? WHERE `user_id` = ?", [$_POST['first_name'], $_POST['last_name'], $_POST['class'], date('Y-m-d H:i:s', time()), $account['user_id']]);
+                    $account = $this->db->query("SELECT * FROM `users` WHERE `user_id` = ?", [$_SESSION['user_data']['user_id']])->getRowArray();
                     HelperFunctions::setAlert("success-profile", "Váš profil byl aktualizován");
                 }
             }
@@ -117,6 +121,8 @@ class AccountController extends BaseController
             {
                 HelperFunctions::setAlert("error-profile", "Profil můžete aktualizovat maximálně 1x denně");
             }
+            
+            $account = $this->users_model->get_by_id($_SESSION['user_data']['user_id']);
         }
         if(isset($_GET['delete']))
         {

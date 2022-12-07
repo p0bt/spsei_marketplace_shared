@@ -5,7 +5,7 @@
                 <img src="/assets/images/logo.png" height="auto" width="200">
             </div>
             <div class="col-md-6 col-12">
-                <h3>SPŠEI Marketplace</h3>
+                <h3><?= SITE_TITLE ?></h3>
             </div>
         </div>
         <div class="row py-5">
@@ -37,7 +37,7 @@
         <div class="row py-5">
             <div class="col-12">
                 <p>
-                    &copy; <?= date('Y', time()) ?> Copyright: SPŠEI Marketplace
+                    &copy; <?= date('Y', time()) ?> Copyright: <?= SITE_TITLE ?>
                 </p>
                 <p class="small">
                     Made by: Peter Butora

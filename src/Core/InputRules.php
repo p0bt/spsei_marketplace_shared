@@ -5,6 +5,13 @@ use DateTime, Exception;
 
 class InputRules 
 {
+    protected $db;
+
+    public function __construct()
+    {
+        $this->db = new Database();
+    }
+    
     public function required($input_value, $rule_value)
     {
         return $input_value == "0" || (isset($input_value) && strlen($input_value) > 0 && !empty($input_value));
@@ -38,7 +45,7 @@ class InputRules
         $table = $arr[0];
         $column = $arr[1];
 
-        $result = Database::query("SELECT * FROM `".$table."` WHERE `".$column."` = ?", [$input_value])->countAll();
+        $result = $this->db->query("SELECT * FROM `".$table."` WHERE `".$column."` = ?", [$input_value])->countAll();
         if($result)
             return (($result > 0) ? false : true);
         return true;

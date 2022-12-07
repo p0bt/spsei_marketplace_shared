@@ -28,8 +28,8 @@ class PageController extends BaseController
         $this->render("views/templates/footer.php");
     }
 
-    public function map_3d()
+    public function offers_3d()
     {
-        $this->render("views/pages/map_3d.php");
+        $this->render("views/pages/3d.php");
     }
 }

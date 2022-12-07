@@ -16,7 +16,7 @@
             <div class="col-md-6 col-12 mb-5 my-md-0">
                 <h4><a href="/admin/dashboard" class="text-white text-decoration-none">Administrátorské rozhraní</a></h4>
                 <p>
-                    &copy; <?= date('Y', time()) ?> Copyright: SPŠEI Marketplace
+                    &copy; <?= date('Y', time()) ?> Copyright: <?= SITE_TITLE ?>
                 </p>
             </div>
         </div>

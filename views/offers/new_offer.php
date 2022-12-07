@@ -37,7 +37,6 @@ use SpseiMarketplace\Core\HelperFunctions;
                     </div>
                     <div class="row py-1">
                         <div class="col-12">
-                            <label for="name" class="form-label">Název:</label>
                             <div id="name-form">
                             </div>
                         </div>
@@ -87,6 +86,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                 </div>
                 <div class="col-md-6 col-12 d-flex align-items-center justify-content-center my-5 my-md-0">
                     <div class="w-100">
+                        <input type="hidden" name="photo*">
                         <div id="dZUpload" class="dropzone">
                             <div class="dz-default dz-message">
                                 <h5 class="my-0">Přetáhněte soubory zde pro nahrání</h5>
@@ -120,8 +120,8 @@ use SpseiMarketplace\Core\HelperFunctions;
         });
 
         function render_name_form(val) {
-            let form = "",
-                options = "",
+            let form = `<label for="name" class="form-label">Název:</label>`,
+                options = `<label for="name" class="form-label">Název:</label>`,
                 select_start = "",
                 select_end = "";
             let is_book = ["povinne_ucebnice", "doporucene_ucebnice", "povinna_cetba"].includes(val);
@@ -151,7 +151,26 @@ use SpseiMarketplace\Core\HelperFunctions;
                                 <?php endforeach; ?>`;
                     break;
                 case 'sesity':
-                    form = `<input class="form-control" type="text" name="name" value="<?= HelperFunctions::setInputValue("name") ?>" placeholder="Např: Kompletní sešit do literetury" autocomplete="off" minlength="3" maxlength="50" required>`;
+                    form += `<input class="form-control" type="text" name="name" value="<?= HelperFunctions::setInputValue("name") ?>" placeholder="Např: Kompletní sešit do literetury" autocomplete="off" minlength="3" maxlength="50" required>`;
+
+                    form += `<div>
+                                <label for="grade" class="form-label">Pro ročník:</label>
+                                <select name="grade" class="form-control" id="grade">
+                                    <?php for ($grade = 1; $grade <= 4; $grade++) : ?>
+                                        <option value="<?= $grade ?>"><?= $grade ?>. ročník</option>
+                                    <?php endfor; ?>
+                                    <option value="0">Vše</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="major" class="form-label">Pro obor:</label>
+                                <select name="major" class="form-control" id="major">
+                                    <?php foreach ($majors as $major) : ?>
+                                        <option value="<?= $major['major_id'] ?>"><?= $major['name'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>`
+                            
                     break;
             }
 

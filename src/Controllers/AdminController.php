@@ -14,9 +14,12 @@ use SpseiMarketplace\Models\Notification;
 use SpseiMarketplace\Models\Auction;
 use SpseiMarketplace\Models\Api;
 use SpseiMarketplace\Models\Category;
+use SpseiMarketplace\Models\Major;
 
 class AdminController extends BaseController
 {
+    private $db;
+
     private $validator;
     private $users_model;
     private $offers_model;
@@ -27,9 +30,12 @@ class AdminController extends BaseController
     private $notifications_model;
     private $auctions_model;
     private $category_model;
+    private $majors_model;
 
     public function __construct()
     {
+        $this->db = new Database();
+
         $this->validator = new Validator();
         $this->users_model = new User();
         $this->offers_model = new Offer();
@@ -41,19 +47,20 @@ class AdminController extends BaseController
         $this->auctions_model = new Auction();
         $this->api_model = new Api();
         $this->category_model = new Category();
+        $this->majors_model = new Major();
     }
 
     public function dashboard()
     {
         // Data for cards
-        $data['cards']['offer_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers`")->getRowArray()['count'];
+        $data['cards']['offer_count'] = $this->db->query("SELECT COUNT(offer_id) AS 'count' FROM `offers`")->getRowArray()['count'];
         $data['cards']['auction_count'] = $this->auctions_model->get_count();
-        $data['cards']['user_count'] = Database::query("SELECT COUNT(user_id) AS 'count' FROM `users`")->getRowArray()['count'];
-        $data['cards']['banned_ip_count'] = Database::query("SELECT COUNT(bi_id) AS 'count' FROM `banned_ips`")->getRowArray()['count'];
-        $data['cards']['class_room_percentage'] = ceil((Database::query("SELECT COUNT(cr_id) AS 'count' FROM `class_room`")->getRowArray()['count'] / Database::query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count']) * 100);
+        $data['cards']['user_count'] = $this->db->query("SELECT COUNT(user_id) AS 'count' FROM `users`")->getRowArray()['count'];
+        $data['cards']['banned_ip_count'] = $this->db->query("SELECT COUNT(bi_id) AS 'count' FROM `banned_ips`")->getRowArray()['count'];
+        $data['cards']['class_room_percentage'] = ceil(($this->db->query("SELECT COUNT(cr_id) AS 'count' FROM `class_room`")->getRowArray()['count'] / $this->db->query("SELECT COUNT(class_id) AS 'count' FROM `classes`")->getRowArray()['count']) * 100);
         // Data for charts
-        $data['charts']['offers_by_date'] = Database::query("SELECT COUNT(offer_id) AS 'count', DATE(`date`) AS 'date' FROM `offers` GROUP BY DATE(`date`)")->getResultArray();
-        $data['charts']['offer_book_count'] = Database::query("SELECT COUNT(offer_id) AS 'count' FROM `offers` WHERE `book_ISBN` IS NOT NULL")->getRowArray()['count'];
+        $data['charts']['offers_by_date'] = $this->db->query("SELECT COUNT(offer_id) AS 'count', DATE(`date`) AS 'date' FROM `offers` GROUP BY DATE(`date`)")->getResultArray();
+        $data['charts']['offer_book_count'] = $this->db->query("SELECT COUNT(offer_id) AS 'count' FROM `offers` WHERE `book_ISBN` IS NOT NULL")->getRowArray()['count'];
         $data['charts']['offer_other_count'] =  $data['cards']['offer_count'] -  $data['charts']['offer_book_count'];
         // Data for widgets
         $this->offers_model->set_limit(0, 5);
@@ -167,6 +174,9 @@ class AdminController extends BaseController
                 'name' => 'required|max_length[50]',
                 'author' => 'required|max_length[50]',
                 'category' => 'required|is_not_unique[categories.category_id]',
+                // Grade 0 = All grades
+                'grade' => 'required|in_list[0,1,2,3,4]',
+                'major' => 'required|is_not_unique[majors.major_id]',
             ]);
             if ($this->validator->run())
             {
@@ -175,6 +185,8 @@ class AdminController extends BaseController
                     'name' => $_POST['name'],
                     'author' => $_POST['author'],
                     'category_id' => $_POST['category'],
+                    'grade' => $_POST['grade'],
+                    'major_id' => $_POST['major'],
                 ];
                 $this->books_model->post($post_data);
             }
@@ -183,8 +195,11 @@ class AdminController extends BaseController
         {
             $this->books_model->delete_by_id($_GET['delete']);
         }
+        
+        $data['validator'] = $this->validator;
 
         $data['books'] = $this->books_model->get_all();
+        $data['majors'] = $this->majors_model->get_all();
         // Remove 'sesity' from categories, because it's not a category for books
         $data['categories'] = array_slice($this->category_model->get_all(), 0, 3);
 

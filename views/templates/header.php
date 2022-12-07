@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPŠEI Marketplace</title>
+    <title><?= SITE_TITLE ?></title>
 
     <!-- JS -->
     <script src="/assets/js/jquery-3.6.0.min.js"></script>
@@ -37,7 +37,7 @@
             <div class="container-fluid">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link text-white" aria-current="page" href="/oblibene"><i class="fa-solid fa-heart me-2"></i>
+                        <a class="nav-link text-white" aria-current="page" href="/muj-ucet?t=wishlist"><i class="fa-solid fa-heart me-2"></i>
                             Oblíbené
                             <span class="count-box item-count-box">
                                 <?= (isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0) ?>
@@ -116,7 +116,7 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                         <li>
-                                            <a class="dropdown-item" href="/oblibene"><i class="fa-solid fa-heart me-2"></i>
+                                            <a class="dropdown-item" href="/muj-ucet?t=wishlist"><i class="fa-solid fa-heart me-2"></i>
                                                 Oblíbené
                                                 <span class="count-box item-count-box item-count-box-dropdown">
                                                     <b>(<?= (isset($_SESSION['wishlist']) ? count($_SESSION['wishlist']) : 0) ?>)</b>

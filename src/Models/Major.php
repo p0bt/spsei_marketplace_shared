@@ -2,11 +2,11 @@
 
 namespace SpseiMarketplace\Models;
 
-class Category extends BaseModel
+class Major extends BaseModel
 {
     public function get_all()
     {
         return $this->db->query("SELECT * 
-                                FROM `categories`")->getResultArray();
+                                FROM `majors`")->getResultArray();
     }
 }

@@ -38,9 +38,29 @@
                     <input type="text" class="form-control" name="author" id="author" autocomplete="off" required maxlength="50">
                 </div>
                 <div class="mb-3">
+                    <label for="grade" class="form-label">Pro ročník:</label>
+                    <select name="grade" class="form-control" id="grade">
+                        <?php for ($grade = 0; $grade <= 4; $grade++) : ?>
+                            <?php if($grade == 0): ?>
+                                <option value="<?= $grade ?>">Vše</option>
+                            <?php else: ?>
+                                <option value="<?= $grade ?>"><?= $grade ?>. ročník</option>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="major" class="form-label">Pro obor:</label>
+                    <select name="major" class="form-control" id="major">
+                        <?php foreach (array_reverse($majors) as $major) : ?>
+                            <option value="<?= $major['major_id'] ?>"><?= $major['name'] ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="category" class="form-label">Kategorie</label>
                     <select name="category" class="form-control" id="category">
-                        <?php foreach($categories as $category): ?>
+                        <?php foreach ($categories as $category) : ?>
                             <option value="<?= $category['category_id'] ?>"><?= $category['name'] ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -53,12 +73,16 @@
 
 <script>
     $(document).ready(function() {
+
+        render_errors();
+
         let data = <?= json_encode($books) ?>;
         let dataTable = $("#book-table").DataTable({
             data: data,
-            order: [[1, "desc"]],
-            columns: [
-                {
+            order: [
+                [1, "desc"]
+            ],
+            columns: [{
                     data: 'b_name',
                 },
                 {
@@ -76,5 +100,16 @@
                 },
             ]
         });
+
+        function render_errors() {
+            let errors = <?= json_encode($validator->getErrors()) ?>;
+            if(errors.length > 0) {
+                [...errors].map((error) => {
+                    let alert = "<div class='alert alert-danger'>" + error.error_message + "</div>";
+                    //$("#"+ error.input_name).before(alert);
+                    $("*[name='" + error.input_name + "']").before(alert);
+                });
+            }
+        }
     });
 </script>

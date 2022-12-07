@@ -193,7 +193,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                                 <select name="target" id="target" class="form-control">
                                     <option value="*" selected>-- Všem uživatelům --</option>
                                     <?php foreach($widgets['users'] as $user): ?>
-                                        <option value="<?= $user['user_id'] ?>"><?= $user['first_name'] ?> <?= $user['last_name'] ?> (ID: <?= $user['user_id'] ?>)</option>
+                                        <option value="<?= $user['user_id'] ?>">ID: <?= $user['user_id'] ?> | <?= $user['email'] ?><?= (!empty($user['first_name']) && !empty($user['last_name'])) ? " | ".$user['first_name']." ".$user['last_name'] : "" ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
