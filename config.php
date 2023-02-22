@@ -9,7 +9,7 @@
 // set Timezone
 date_default_timezone_set("Europe/Prague");
 
-// Turn off displaying errors (FOR PRODUCTION ONLY)
+// !!! Turn off displaying errors (FOR PRODUCTION ONLY) !!!
 //error_reporting(0);
 
 // Site settings
@@ -40,3 +40,6 @@ define("DB_name", "spsei_marketplace");
 
     // AUCTIONS
     define("AUCTION_BID_DELAY", 10);
+
+    // PASSWORD
+    define("RESET_PASSWORD_TOKEN_EXPIRATION", 1); // in hours

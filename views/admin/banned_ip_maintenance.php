@@ -34,7 +34,9 @@
                 {
                     data: "bi_id",
                     render: function(data, type, row) {
-                        return '<a type="button" href="?unban=' + data + '" class="btn btn-danger mr-1"><i class="fa-solid fa-trash"></i></a>';
+                        let render = '<a type="button" href="?unban=' + data + '" class="btn btn-danger mr-2"><i class="fa-solid fa-trash-can"></i></a>';
+                        render += '<a type="button" href="/admin/upravit-zablokovanou-ip?id=' + data + '" class="btn btn-primary mr-2"><i class="fa-solid fa-pencil"></i></a>';
+                        return render;
                     },
                 },
             ],

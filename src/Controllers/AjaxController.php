@@ -1,6 +1,7 @@
 <?php
 namespace SpseiMarketplace\Controllers;
 
+use Exception;
 use SpseiMarketplace\Core\Validator;
 use SpseiMarketplace\Core\Database;
 use SpseiMarketplace\Core\Filter;
@@ -31,30 +32,42 @@ class AjaxController extends BaseController
         echo json_encode($this->db->query("SELECT `top_bid` FROM `auctions` WHERE `auction_id` = ?", [$_POST['auction_id']]));
     }
 
-    public function send_email()
+    public function start_socketio_server()
     {
-        if($_POST)
-        {
-            $this->validator->addMultipleRules([
-                'email' => 'required|max_length[100]',
-                'text' => 'required|max_length[255]',
-            ]);
-            if($this->validator->run())
-            {
-                $from = $_POST['email'];
-                $to = $_POST['receiver'];
-                $message = $_POST['text'];
+        if(!Filter::is_admin()) die;
 
-                $subject = "Nová zpráva - " . SITE_TITLE;
-                $headers = 'From: ' . $from . "\r\n" .
-                'Reply-To: ' . $from . "\r\n" .
-                'X-Mailer: PHP/' . phpversion();
-
-                if(mail($to, $subject, $message, $headers)) 
-                    echo json_encode(["success" => "Zpráva byla odeslána prodejci"]);
-                else
-                    echo json_encode(["error" => "Někde nastala chyba, zkuste prosím akci opakovat"]);
-            }
+        try {
+            $channel = pclose(popen("php /b ".SITE_PATH."/bin/ChannelServer.php", 'r'));
+            $socketio = pclose(popen("php /b ".SITE_PATH."/bin/SocketIOServer.php", 'r'));
+            //shell_exec("php ".SITE_PATH."/bin/ChannelServer.php");
+            //hell_exec("php ".SITE_PATH."/bin/SocketIOServer.php");
+        } catch(Exception $e) {
+            echo json_encode($e);
+            die;
         }
+
+        echo json_encode([
+            "success" => "true"
+        ]);
+    }
+
+    public function socketio_shell_output()
+    {
+        if(!Filter::is_admin()) die;
+        // Stolen from:
+        // https://stackoverflow.com/questions/8370628/php-shell-exec-with-realtime-updating
+
+        $response = "";
+        /*
+        if(($fp = popen("php ChannelServer.php SocketIOServer.php", "r"))) {
+            while(!feof($fp)){
+                $response .= fread($fp, 1024);
+                // flush buffer
+                flush();
+            }
+            fclose($fp);
+        }
+        */
+        echo json_encode($response);
     }
 }

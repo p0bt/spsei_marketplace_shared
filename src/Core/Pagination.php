@@ -9,6 +9,7 @@ class Pagination
     private $current_page;
     private $page_url;
     private $page_count;
+    private $key_name;
 
     public function __construct($items_count, $page_url, $key_name)
     {

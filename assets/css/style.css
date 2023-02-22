@@ -131,12 +131,18 @@ a, img {
 
 .ch-text-small {
     font-size: 0.9rem;
+    /* !!! Line below is very important - it allows multi-line message so it fits in chat !!! */
+    word-break: break-all;
 }
 
 .messages-box,
 .chat-box {
-    height: 600px;
+    max-height: 600px;
     overflow-y: scroll;
+}
+
+.chat-box {
+    height: 600px;
 }
 
 .list-group-item.active {

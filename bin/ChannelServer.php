@@ -4,8 +4,8 @@ namespace SpseiMarketplace\Core;
 
 // This has to be required because this is fired via CMD :D
 // Vendor autoloading classes
-require '../vendor/autoload.php';
-require '../config.php';
+require realpath('../vendor/autoload.php');
+require realpath('../config.php');
 
 use Channel\Server;
 use Workerman\Worker;
@@ -17,7 +17,8 @@ class ChannelServer
 
 	public function __construct($ip)
 	{
-		$this->server = new Server($ip);
+		$this->ip = $ip;
+		$this->server = new Server($this->ip);
 	}
 
 	public function run()

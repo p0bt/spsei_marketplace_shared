@@ -38,7 +38,7 @@
         <div class="col-lg-11 col-10 h-100 banner-gradient">
             <h3 class="d-flex h-100 justify-content-center align-items-center">3D nabídky</h3>
         </div>
-        <div class="col-lg-1 col-2 h-100 banner-gradient border-start border-white border-3">
+        <div class="col-lg-1 col-2 h-100 bg-dark border-start border-white border-3">
             <a href="/3d" class="d-flex h-100 justify-content-center align-items-center text-white text-decoration-none"><i class="fa-solid fa-maximize" style="font-size: 24px;"></i></a>
         </div>
     </div>

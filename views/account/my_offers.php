@@ -4,7 +4,13 @@ use SpseiMarketplace\Core\HelperFunctions;
 ?>
 
 <div>
-    <h4 class="mb-5">Moje nabídky</h4>
+    <div class="row my-5">
+        <div class="col-12">
+            <div class="card bg-dark py-2 text-white text-center">
+                <h1>Moje nabídky</h1>
+            </div>
+        </div>
+    </div>
     <?php if ($alert = HelperFunctions::getAlert("error-offer")) : ?>
         <div class="row">
             <div class="col-12">
@@ -48,7 +54,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                 </div>
             </div>
             <div class="row mt-5 g-0">
-                <a href="/muj-ucet?t=my-offers" class="btn btn-primary text-uppercase rounded-0">Obnovit</a>
+                <a href="/muj-ucet?t=my-offers" class="btn btn-light text-uppercase rounded-0">Obnovit</a>
                 <button type="submit" class="btn btn-secondary text-uppercase rounded-0">Filtrovat</button>
             </div>
         </div>

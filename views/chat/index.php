@@ -19,11 +19,11 @@
                         <?= $chat['first_name'] ?> <?= $chat['last_name'] ?> (<?= $chat['email'] ?>)
                       </h6>
                       <small class="small font-weight-bold" id="preview_date_sent_<?= $chat['chat_id'] ?>">
-                        <?= !empty($chat['date_sent']) ? date('d.m.Y H:i:s', strtotime($chat['date_sent'])) : "" ?>
+                        <i><?= !empty($chat['date_sent']) ? date('d.m.Y H:i:s', strtotime($chat['date_sent'])) : "" ?></i>
                       </small>
                     </div>
                     <p class="font-italic mb-0 ch-text-small" id="preview_last_text_<?= $chat['chat_id'] ?>">
-                      <?= $chat['last_text'] ?>
+                      <?= strlen($chat['last_text']) >= 60 ? substr($chat['last_text'], 0, 60) . "..." : $chat['last_text'] ?>
                     </p>
                   </div>
                 </div>
@@ -40,15 +40,28 @@
           <?php foreach ($messages as $message) : ?>
             <?php
             $mine = $message['sender'] == $_SESSION['user_data']['user_id'];
+            $system_message = $message['sender'] == 0;
             ?>
-            <div class="media w-50 mb-3 <?= ($mine) ? "ms-auto" : "" ?>">
-              <div class="media-body <?= (!$mine) ? "ml-3" : "" ?>">
-                <div class="<?= ($mine) ? "chat-background" : "bg-light" ?> rounded py-2 px-3 mb-2">
-                  <p class="ch-text-small mb-0 <?= ($mine) ? "text-white" : "text-muted" ?>"><?= $message['text'] ?></p>
+            <?php if ($system_message) : ?>
+              <div class="media w-100 mb-3">
+                <div class="media-body">
+                  <div class="rounded py-4 px-3 mb-2 bg-dark">
+                    <p class="mb-0 text-white"><?= $message['text'] ?></p>
+                  </div>
                 </div>
-                <p class="small text-muted"><?= date('d.m.Y H:i:s', strtotime($message['date_sent'])) ?></p>
               </div>
-            </div>
+            <?php else : ?>
+              <div class="media w-50 mb-3 <?= ($mine) ? "ms-auto" : "" ?>">
+                <div class="media-body <?= (!$mine) ? "ml-3" : "" ?>">
+                  <div class="<?= ($mine) ? "chat-background" : "bg-light" ?> rounded py-2 px-3 mb-2">
+                    <p class="ch-text-small mb-0 <?= ($mine) ? "text-white" : "text-muted" ?>"><?= $message['text'] ?></p>
+                  </div>
+                  <p class="small text-muted"><?= date('d.m.Y H:i:s', strtotime($message['date_sent'])) ?></p>
+                </div>
+              </div>
+            <?php endif; ?>
+
+
           <?php endforeach; ?>
         <?php else : ?>
           Zatím zde nejsou žádné zprávy
@@ -71,6 +84,16 @@
   </div>
 </div>
 <script>
+  // Scroll down on chat open
+  <?php if (isset($_GET['chat']) && !empty($_GET['chat']) && isset($messages) && !empty($messages)) : ?>
+    $(document).ready(function() {
+      // Stolen from:
+      // https://stackoverflow.com/questions/10503606/scroll-to-bottom-of-div-on-page-load-jquery
+      $(".chat-box").animate({
+        scrollTop: $('.chat-box').prop("scrollHeight")
+      }, 750);
+    });
+  <?php endif; ?>
   // WebSocket connection
   let socket = io('<?= WEBSOCKETS_PROTOCOL ?>://<?= SITE_URL ?>:<?= WEBSOCKETS_PORT ?>', {
     secure: true
@@ -80,12 +103,27 @@
     data = JSON.parse(data);
     const preview_id = "preview_" + data.chat_id;
 
-    let mine = <?= intval($_SESSION['user_data']['user_id']) ?> == parseInt(data.sender);
+    let sender_id = parseInt(data.sender);
+    let mine = <?= intval($_SESSION['user_data']['user_id']) ?> == sender_id;
     let date_sent = new Date(Date.parse(data.date_sent));
 
     let formated_date = ("0" + date_sent.getDate()).slice(-2) + "." + ("0" + (parseInt(date_sent.getMonth()) + 1)).slice(-2) + "." + date_sent.getFullYear() + " " + ("0" + date_sent.getHours()).slice(-2) + ":" + ("0" + date_sent.getMinutes()).slice(-2) + ":" + ("0" + date_sent.getSeconds()).slice(-2);
-
-    let element = `<div class="media w-50 mb-3 ` + ((mine) ? `ms-auto` : ``) + `">
+    let element = ``;
+    
+    // If is System Message
+    if(sender_id == 0)
+    {
+      element = `<div class="media w-100 mb-3">
+                    <div class="media-body">
+                      <div class="rounded py-4 px-3 mb-2 bg-dark">
+                        <p class="mb-0 text-white">` + data.text + `</p>
+                      </div>
+                    </div>
+                  </div>`;
+    }
+    else // It's user message
+    {
+      element = `<div class="media w-50 mb-3 ` + ((mine) ? `ms-auto` : ``) + `">
                     <div class="media-body ` + ((!mine) ? `ml-3` : ``) + `">
                       <div class="` + ((mine) ? `chat-background` : `bg-light`) + ` rounded py-2 px-3 mb-2">
                         <p class="ch-text-small mb-0 ` + ((mine) ? `text-white` : `text-muted`) + `">` + data.text + `</p>
@@ -93,7 +131,7 @@
                       <p class="small text-muted">` + formated_date + `</p>
                     </div>
                   </div>`;
-
+    }
 
     $("#messages-container").ready(function() {
       $("#" + preview_id + " #preview_date_sent_" + data.chat_id).text(data.date_sent);

@@ -30,11 +30,11 @@ class ApiController extends BaseController
         $offers = $this->db->query("SELECT cr.room_code AS 'room_code', o.*, cat.value AS 'category', u.user_id AS 'u_user_id', u.first_name AS 'u_first_name', u.last_name AS 'u_last_name', u.class_id AS 'u_class_id', c.name AS 'c_name', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author' 
                                     FROM `offers` `o` 
                                     LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
-                                    LEFT JOIN `users` `u` ON `u`.`user_id` = `o`.`user_id` 
+                                    INNER JOIN `users` `u` ON `u`.`user_id` = `o`.`user_id` 
                                     LEFT JOIN `classes` `c` ON `c`.`class_id` = `u`.`class_id` 
                                     LEFT JOIN `class_room` `cr` ON `cr`.`class_id` = `u`.`class_id` 
                                     LEFT JOIN `auctions` `a` ON `a`.`offer_id` = `o`.`offer_id` 
-                                    INNER JOIN `categories` `cat` ON `cat`.`category_id` = `o`.`category_id` 
+                                    LEFT JOIN `categories` `cat` ON `b`.`category_id` = `cat`.`category_id` 
                                     WHERE a.auction_id IS NULL AND `c`.`name` = ?", [$_GET['trida']])->getResultArray();
         
         foreach($offers as $offer)

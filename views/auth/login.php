@@ -30,7 +30,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                     </div>
                     <div class="mb-3">
                         <div>
-                            <a href="/zapomenute-heslo" class="link-primary text-decoration-none">Zapomenuté heslo</a>
+                            <a href="/obnovit-heslo" class="link-primary text-decoration-none">Zapomenuté heslo</a>
                         </div>
                         <a href="/registrace" class="link-primary text-decoration-none">Klikněte zde pro registraci</a>
                     </div>

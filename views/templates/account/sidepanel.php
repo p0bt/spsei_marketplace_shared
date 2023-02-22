@@ -1,4 +1,5 @@
 <?php
+
 use SpseiMarketplace\Core\HelperFunctions;
 ?>
 
@@ -49,6 +50,43 @@ use SpseiMarketplace\Core\HelperFunctions;
         </form>
     </div>
     <div class="card rounded-3 d-lg-block d-none my-4 p-5 animate__animated animate__pulse animate__delay-1s">
+        <h4><i class="fa-solid fa-lock"></i> Změnit heslo</h4>
+        <hr class="w-100 light mt-1 mb-3 p-0">
+        <?php if ($alert = HelperFunctions::getAlert("error-password")) : ?>
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        <?= $alert ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+        <?php if ($alert = HelperFunctions::getAlert("success-password")) : ?>
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-success">
+                        <?= $alert ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+        <form method="POST" action="/change-password">
+            <div class="mb-3">
+                <label for="password" class="form-label">Staré heslo</label>
+                <input type="password" class="form-control" name="password" id="password" value="" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Nové heslo</label>
+                <input type="password" class="form-control" name="new_password" id="new_password" value="" minlength="8" maxlength="255" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Nové heslo znovu</label>
+                <input type="password" class="form-control" name="new_cpassword" id="new_cpassword" value="" minlength="8" maxlength="255" required>
+            </div>
+            <button type="submit" class="btn btn-primary text-uppercase w-100 my-1">Změnit heslo</button>
+        </form>
+    </div>
+    <div class="card rounded-3 d-lg-block d-none my-4 p-5 animate__animated animate__pulse animate__delay-2s">
         <h4 class="mb-3"><i class="fa-solid fa-bars-staggered"></i> Shrnutí</h4>
         <hr class="w-100 light mt-1 mb-3 p-0">
         <div class="mb-1">
@@ -67,7 +105,7 @@ use SpseiMarketplace\Core\HelperFunctions;
             <i class="fa-solid fa-bell"></i> Počet oznámení: <?= isset($notifications) ? count($notifications) : 0 ?>
         </div>
     </div>
-    <div class="card rounded-3 d-lg-block d-none my-4 p-5 animate__animated animate__pulse animate__delay-2s">
+    <div class="card rounded-3 d-lg-block d-none my-4 p-5 animate__animated animate__pulse animate__delay-3s">
         <h4 class="mb-3"><i class="fa-solid fa-heart"></i> Nedávno přidáno do oblíbených</h4>
         <hr class="w-100 light mt-1 mb-3 p-0">
         <?php if (isset($data['wishlist']) && !empty($data['wishlist'])) : ?>

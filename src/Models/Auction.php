@@ -17,6 +17,14 @@ class Auction extends BaseModel
                                 FROM `auctions`")->getResultArray();
     }
 
+    public function get_by_id($auction_id)
+    {
+        return $this->db->query("SELECT * 
+                                FROM `auctions`
+                                WHERE auction_id = ?", 
+                                [$auction_id])->getRowArray();
+    }
+
     public function get_all_with_filters($start, $length, $search, $status)
     {
         $base_sql = "SELECT * 
@@ -67,7 +75,16 @@ class Auction extends BaseModel
     {
         return $this->db->query("SELECT * 
                                 FROM `auctions` 
-                                WHERE CURRENT_TIMESTAMP() > `end_date`")->getResultArray();
+                                WHERE CURRENT_TIMESTAMP() > `end_date`
+                                AND closed = 0")->getResultArray();
+    }
+
+    public function close_old_auctions()
+    {
+        return $this->db->query("UPDATE `auctions`
+                                SET closed = 1 
+                                WHERE CURRENT_TIMESTAMP() > `end_date`
+                                AND closed = 0");
     }
 
     public function get_running_auctions()
@@ -109,5 +126,17 @@ class Auction extends BaseModel
                                 FROM `auctions` 
                                 WHERE CURRENT_TIMESTAMP() > `end_date` AND user_id = ?",
                                 [$user_id])->getResultArray();
+    }
+
+    public function update($data, $auction_id)
+    {
+        return $this->db->query("UPDATE `auctions` 
+                                SET offer_id = ?,
+                                    top_bid = ?,
+                                    user_id = ?,
+                                    `start_date` = ?,
+                                    `end_date` = ?
+                                WHERE auction_id = ?", 
+                                [$data['offer_id'], $data['top_bid'], $data['user_id'], $data['start_date'], $data['end_date'], $auction_id]);
     }
 }

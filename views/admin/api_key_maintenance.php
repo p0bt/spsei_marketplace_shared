@@ -73,7 +73,9 @@
                 {
                     data: "api_key_id",
                     render: function(data, type, row) {
-                        return '<a href="/admin/sprava-api-klicu?delete=' + data + '" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></a>';
+                        let render = '<a href="/admin/sprava-api-klicu?delete=' + data + '" class="btn btn-danger mr-2"><i class="fa-solid fa-trash-can"></i></a>';
+                        render += '<a type="button" href="/admin/upravit-api-klic?id=' + data + '" class="btn btn-primary mr-2"><i class="fa-solid fa-pencil"></i></a>';
+                        return render;
                     },
                 },
             ]

@@ -70,14 +70,14 @@ class Offer extends BaseModel
                 if(isset($price)) 
                 {
                     $price = explode(" ", $price);
-                    $price_min = is_numeric($price[0]) ? $price[0] : 0;
-                    $price_max = is_numeric($price[1]) ? $price[1] : 0;
+                    $price_min = is_numeric($price[0]) ? $price[0] : 1;
+                    $price_max = is_numeric($price[1]) ? $price[1] : MAX_OFFER_PRICE;
                     $this->sql[] = "`price` >= ".$price_min." AND `price` <= ".$price_max;
                 }
                 break;
 
             case "zdarma":
-                $this->sql[] = "`price` = 0";
+                $this->sql[] = "`price` = 0 AND `a`.`auction_id` IS NULL";
                 break;
 
             case "vse":
@@ -181,7 +181,7 @@ class Offer extends BaseModel
 
     public function get_all($order_by = null, $order = null)
     {
-        $sql = "SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
+        $sql = "SELECT o.*, nb.name AS 'name', nb.notebook_id AS 'nb_id', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', IFNULL(cat.name, 'Sešity') AS 'cat_name', IFNULL(cat.value, 'sesity') AS 'cat_value' 
                 FROM `offers` `o` 
                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN`
                 LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
@@ -215,7 +215,7 @@ class Offer extends BaseModel
 
     public function get_all_with_user_info()
     {
-        $sql = "SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.email AS 'email', u.first_name AS 'first_name', u.last_name AS 'last_name', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', c.name AS 'c_name', cat.name AS 'cat_name', cat.value AS 'cat_value'  
+        $sql = "SELECT o.*, nb.name AS 'name', nb.notebook_id AS 'nb_id', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.email AS 'email', u.first_name AS 'first_name', u.last_name AS 'last_name', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', c.name AS 'c_name', IFNULL(cat.name, 'Sešity') AS 'cat_name', IFNULL(cat.value, 'sesity') AS 'cat_value'  
                 FROM `offers` `o` 
                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
                 LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
@@ -228,7 +228,7 @@ class Offer extends BaseModel
 
     public function get_by_id($offer_id)
     {
-        return $this->db->query("SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.*, b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
+        return $this->db->query("SELECT o.*, nb.name AS 'name', nb.notebook_id AS 'nb_id', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', u.*, b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', IFNULL(cat.name, 'Sešity') AS 'cat_name', IFNULL(cat.value, 'sesity') AS 'cat_value' 
                                 FROM `offers` `o` 
                                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
                                 LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
@@ -241,7 +241,7 @@ class Offer extends BaseModel
 
     public function get_from_user($user_id, $order_by = null, $order = null)
     {
-        $sql = "SELECT o.*, nb.name AS 'name', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', cat.name AS 'cat_name', cat.value AS 'cat_value' 
+        $sql = "SELECT o.*, nb.name AS 'name', nb.notebook_id AS 'nb_id', a.auction_id AS 'a_auction_id', a.start_date AS 'a_start_date', a.end_date AS 'a_end_date', b.book_ISBN AS 'b_book_ISBN', b.name AS 'b_name', b.author AS 'b_author', IFNULL(cat.name, 'Sešity') AS 'cat_name', IFNULL(cat.value, 'sesity') AS 'cat_value' 
                 FROM `offers` `o` 
                 LEFT JOIN `books` `b` ON `o`.`book_ISBN` = `b`.`book_ISBN` 
                 LEFT JOIN `notebooks` `nb` ON `nb`.`notebook_id` = `o`.`notebook_id` 
@@ -295,5 +295,19 @@ class Offer extends BaseModel
     {
         return $this->db->query("SELECT MAX(`price`) AS 'price' 
                                 FROM `offers`")->getRowArray()['price'];
+    }
+
+    public function update($data, $offer_id)
+    {
+        return $this->db->query("UPDATE `offers` 
+                                SET user_id = ?,
+                                    notebook_id = ?,
+                                    book_ISBN = ?,
+                                    `description` = ?,
+                                    price = ?,
+                                    image_path = ?,
+                                    `date` = ?
+                                WHERE offer_id = ?", 
+                                [$data['user_id'], $data['notebook_id'], $data['book_ISBN'], $data['description'], $data['price'], $data['image_path'], $data['date'], $offer_id]);
     }
 }

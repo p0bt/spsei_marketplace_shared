@@ -147,6 +147,7 @@ class HelperFunctions
         return $result;
     }*/
 
+    // https://stackoverflow.com/questions/3003145/how-to-get-the-client-ip-address-in-php
     public static function getClientIp() 
     {
         if (isset($_SERVER['HTTP_CLIENT_IP']))
@@ -164,5 +165,13 @@ class HelperFunctions
         else
             $ip = 'UNKNOWN';
         return $ip;
-    } 
+    }
+
+    public static function replaceEmptyWithNull(&$data)
+    {
+        // Replace empty values with NULL
+        $data = array_map(function($value) {
+            return $value === "" ? NULL : $value;
+        }, $data);
+    }
 }

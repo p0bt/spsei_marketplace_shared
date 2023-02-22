@@ -54,7 +54,8 @@ class WishlistController extends BaseController
                     {
                         if(isset($of) && !empty($of))
                         {
-                            if(!in_array($of["offer_id"], $data['suggestions']['offers']) && !$this->offers_model->is_mine($_SESSION['user_data']['user_id'], $of["offer_id"]))
+                            // Don't suggest offers which are already in wishlist or which are already suggested
+                            if((isset($_SESSION['wishlist']) && !in_array($of["offer_id"], $_SESSION['wishlist'])) && !in_array($of["offer_id"], $data['suggestions']['offers']) && !$this->offers_model->is_mine($_SESSION['user_data']['user_id'], $of["offer_id"]))
                                 $data['suggestions']['offers'][$of["offer_id"]] = $of;
                         }
                     }
@@ -68,7 +69,8 @@ class WishlistController extends BaseController
                     {
                         if(isset($auctions) && !empty($auctions))
                         {
-                            if(!in_array($auctions["offer_id"], $data['suggestions']['auctions']) && !$this->offers_model->is_mine($_SESSION['user_data']['user_id'], $auctions["offer_id"]))
+                            // Don't suggest auctions which are already in wishlist or which are already suggested
+                            if((isset($_SESSION['wishlist']) && !in_array($auctions["offer_id"], $_SESSION['wishlist'])) && !in_array($auctions["offer_id"], $data['suggestions']['auctions']) && !$this->offers_model->is_mine($_SESSION['user_data']['user_id'], $auctions["offer_id"]))
                                 $data['suggestions']['auctions'][$auctions["offer_id"]] = $auctions;
                         }
                     }

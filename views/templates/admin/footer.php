@@ -118,6 +118,27 @@
             className: "align-middle text-center",
         }],
     });
+
+    // When link with href attribute which contains 'delete' is clicked, show popup first with confirmation
+    $(document).ready(function() {
+        $('table').on('click', 'a[href*="?delete="]', function(e) {
+            var redirect_link = $(this).attr('href');
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Odstranění záznamu',
+                text: "Opravdu chcete odstranit tento záznam?",
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonText: 'Ano',
+                cancelButtonText: 'Ne'
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    location.href = redirect_link;
+                }
+            });
+        });
+    });
 </script>
 </body>
 

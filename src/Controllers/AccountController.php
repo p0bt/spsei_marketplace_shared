@@ -45,6 +45,7 @@ class AccountController extends BaseController
         $this->account_data['offers'] = $this->offers_model->get_from_user($_SESSION['user_data']['user_id'], "date", "DESC");
         
         // Get overview info
+        // https://www.php.net/manual/en/function.array-filter.php
         $this->account_data['overview'] = [
             "offer_count" => $this->offers_model->get_count_from_user($_SESSION['user_data']['user_id']),
             "auction_count" => count(array_filter($this->account_data['offers'], function($value) {
@@ -172,5 +173,34 @@ class AccountController extends BaseController
         $this->offers_model->set_limit($this->account_data['my_won_auctions_pagination']->get_limit_a(), $this->account_data['my_won_auctions_pagination']->get_limit_b());
 
         $this->render("views/account/my_won_auctions.php", $this->account_data);
+    }
+
+    public function change_password()
+    {
+        if ($_POST)
+        {
+            $this->validator->addMultipleRules([
+                'password' => 'required|min_length[8]|max_length[255]',
+                'new_password' => 'required|min_length[8]|max_length[255]',
+                'new_cpassword' => 'required|min_length[8]|max_length[255]|matches[new_password]',
+            ]);
+            // Validate all of the password inputs
+            // And check that user typed his old password correctly
+            if ($this->validator->run() && password_verify($_POST['password'], $_SESSION['user_data']['password']))
+            {
+                $password = password_hash($_POST['new_password'], AuthController::hashing_algorithm);
+                // Update user's password with a new one
+                $this->users_model->update_password($password, $_SESSION['user_data']['user_id']);
+
+                HelperFunctions::setAlert("success-password", "Heslo bylo změněno");
+            }
+            else
+            {
+                HelperFunctions::setAlert("error-password", "Zkontrolujte chyby a zkuste to znovu");
+            }
+        }
+        
+        header("Location: /muj-ucet");
+        die;
     }
 }

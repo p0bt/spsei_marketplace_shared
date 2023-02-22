@@ -311,6 +311,11 @@ use SpseiMarketplace\Core\HelperFunctions;
                         formData.append(data[0], data[1]);
                     }
                 });
+
+                // Reset dropzone on form submit
+                dropzone.on("complete", function(file) { 
+                    this.removeAllFiles(true);
+                });
             },
             successmultiple: function(file, response) {
                 let resp = $.parseJSON(response);
@@ -337,6 +342,7 @@ use SpseiMarketplace\Core\HelperFunctions;
         };
 
         let dropzone = new Dropzone(document.getElementById("dZUpload"), dropzone_config);
+        console.log(dropzone);
 
         $("#submit-btn").click(function(e) {
             e.preventDefault();

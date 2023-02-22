@@ -73,107 +73,103 @@ class OfferController extends BaseController
                 'photo*' => 'is_image|max_size[1024]|min_count[1]|max_count[4]'
             ]);
             try {
-                if ($this->validator->run())
+                $price = null;
+
+                switch(intval($_POST['category'])) 
                 {
-                    $price = null;
+                    case 1:
+                    case 2:
+                    case 3:
+                        $this->validator->addMultipleRules([
+                            'name' => 'required|is_not_unique[books.book_ISBN]',
+                        ]);
+                        break;
 
-                    switch(intval($_POST['category'])) 
-                    {
-                        case 1:
-                        case 2:
-                        case 3:
-                            $this->validator->addMultipleRules([
-                                'name' => 'required|is_not_unique[books.book_ISBN]',
-                            ]);
-                            break;
-
-                        case 4:
-                            $this->validator->addMultipleRules([
-                                'name' => 'required|min_length[3]|max_length[50]',
-                                // Grade 0 = All grades
-                                'grade' => 'required|in_list[0,1,2,3,4]',
-                                'major' => 'required|is_not_unique[majors.major_id]',
-                            ]);
-                            break;
-                    }
-
-                    switch($_POST['price_type']) 
-                    {
-                        case 'pevna':
-                            $this->validator->addMultipleRules([
-                                'price' => 'required|is_number|less_than['.(MAX_OFFER_PRICE+1).']',
-                            ]);
-                            $price = $_POST['price'];
-                            break;
-                        case 'aukce':
-                            $this->validator->addMultipleRules([
-                                'price' => 'permit_empty',
-                                'start_date' => 'required|is_valid_datetime|datetime_greather_than['.(time() + 3600 - 1).']|datetime_less_than['.(time() + ((OFFER_EXPIRATION_DAYS - 1) * 86400) + 1).']',
-                                'end_date' => 'required|is_valid_datetime|datetime_greather_than[start_date,'.(86400 - 1).']|datetime_less_than[start_date, '.(3600 + ((OFFER_EXPIRATION_DAYS - 1) * 86400) + 1).']',
-                            ]);
-                            break;
-                    }
-                    if ($this->validator->run()) 
-                    {
-                        $notebook_id = null;
-                        $name = $_POST['name'];
-                        $book_ISBN = $name;
-
-                        if(intval($_POST['category']) == 4) {
-                            $notebook_id = $this->notebooks_model->post([
-                                'name' => $name,
-                                'grade' => $_POST['grade'], 
-                                'major_id' => $_POST['major'],
-                            ]);
-                            $book_ISBN = null;
-                        }
-
-                        $post_data = [
-                            'user_id' => $_SESSION['user_data']['user_id'],
-                            'notebook_id' => $notebook_id,
-                            'book_ISBN' => $book_ISBN,
-                            'description' => $_POST['description'],
-                            'price' => $price,
-                            'image_path' => "offer_u".$_SESSION['user_data']['user_id']."_".uniqid(),
-                        ];
-                        
-                        $uploads_dir = SITE_PATH."/uploads";
-                        mkdir($uploads_dir.'/'.$post_data['image_path']);
-
-                        foreach($_FILES['photo']['name'] as $key => $value)
-                        {
-                            $extension = explode('.', $value)[1];
-                            move_uploaded_file($_FILES['photo']['tmp_name'][$key], ($uploads_dir.'/'.$post_data['image_path'].'/'.$key.'.'.$extension));
-                        }
-
-                        $response = [
-                            "success" => true,
-                            "text" => "Nabídka byla zveřejněna",
-                        ];
-
-                        // Post new offer, and get it's offer_id
-                        $offer_id = $this->offers_model->post($post_data);
-
-                        if($_POST['price_type'] == "aukce")
-                        {
-                            $post_data = [
-                                'offer_id' => $offer_id,
-                                'start_date' => $_POST['start_date'],
-                                'end_date' => $_POST['end_date'],
-                            ];
-
-                            $this->auctions_model->post($post_data);
-
-                            unset($response);
-                            $response = [
-                                "success" => true,
-                                "text" => "Nabídka byla zveřejněna, aukce začne ve zvolený čas",
-                            ];
-                        }
-                    }
+                    case 4:
+                        $this->validator->addMultipleRules([
+                            'name' => 'required|min_length[3]|max_length[50]',
+                            // Grade 0 = All grades
+                            'grade' => 'required|in_list[0,1,2,3,4]',
+                            'major' => 'required|is_not_unique[majors.major_id]',
+                        ]);
+                        break;
                 }
 
-                if(!isset($response))
+                switch($_POST['price_type']) 
+                {
+                    case 'pevna':
+                        $this->validator->addMultipleRules([
+                            'price' => 'required|is_number|less_than['.(MAX_OFFER_PRICE+1).']',
+                        ]);
+                        $price = $_POST['price'];
+                        break;
+                    case 'aukce':
+                        $this->validator->addMultipleRules([
+                            'price' => 'permit_empty',
+                            'start_date' => 'required|is_valid_datetime|datetime_greather_than['.(time() + 3600 - 1).']|datetime_less_than['.(time() + ((OFFER_EXPIRATION_DAYS - 1) * 86400) + 1).']',
+                            'end_date' => 'required|is_valid_datetime|datetime_greather_than[start_date,'.(86400 - 1).']|datetime_less_than[start_date, '.(3600 + ((OFFER_EXPIRATION_DAYS - 1) * 86400) + 1).']',
+                        ]);
+                        break;
+                }
+
+                if ($this->validator->run()) 
+                {
+                    $notebook_id = null;
+                    $name = $_POST['name'];
+                    $book_ISBN = $name;
+
+                    if(intval($_POST['category']) == 4) {
+                        $notebook_id = $this->notebooks_model->post([
+                            'name' => $name,
+                            'grade' => $_POST['grade'], 
+                            'major_id' => $_POST['major'],
+                        ]);
+                        $book_ISBN = null;
+                    }
+
+                    $post_data = [
+                        'user_id' => $_SESSION['user_data']['user_id'],
+                        'notebook_id' => $notebook_id,
+                        'book_ISBN' => $book_ISBN,
+                        'description' => $_POST['description'],
+                        'price' => $price,
+                        'image_path' => "offer_u".$_SESSION['user_data']['user_id']."_".uniqid(),
+                    ];
+                    
+                    $uploads_dir = SITE_PATH."/uploads";
+                    mkdir($uploads_dir.'/'.$post_data['image_path']);
+
+                    foreach($_FILES['photo']['name'] as $key => $value)
+                    {
+                        $extension = explode('.', $value)[1];
+                        move_uploaded_file($_FILES['photo']['tmp_name'][$key], ($uploads_dir.'/'.$post_data['image_path'].'/'.$key.'.'.$extension));
+                    }
+
+                    $response = [
+                        "success" => true,
+                        "text" => "Nabídka byla zveřejněna",
+                    ];
+
+                    // Post new offer, and get it's offer_id
+                    $offer_id = $this->offers_model->post($post_data);
+
+                    if($_POST['price_type'] == "aukce")
+                    {
+                        $post_data = [
+                            'offer_id' => $offer_id,
+                            'start_date' => $_POST['start_date'],
+                            'end_date' => $_POST['end_date'],
+                        ];
+
+                        $this->auctions_model->post($post_data);
+                        
+                        $response = [
+                            "success" => true,
+                            "text" => "Nabídka byla zveřejněna, aukce začne ve zvolený čas",
+                        ];
+                    }
+                }
+                else
                 {
                     $response = [
                         "success" => false,
@@ -209,26 +205,25 @@ class OfferController extends BaseController
 
     public function offer_detail()
     {
-        // Handle non-existing offer
-        if(isset($_GET['id']))
-        {
-            $data['offer'] = $this->offers_model->get_by_id($_GET['id']);
-            $data['thumbnail'] = '/assets/images/no_image.png';
-            $data['is_auction'] = isset($data['offer']['a_auction_id']) && !empty($data['offer']['a_auction_id']);
-            
-            if(is_dir(SITE_PATH.'/uploads/'.$data['offer']['image_path']))
-            {
-                $data['images'] = array_values(array_diff(scandir(SITE_PATH.'/uploads/'.$data['offer']['image_path']), ['.', '..']));
-                $data['thumbnail'] = '/uploads/'.$data['offer']['image_path'].'/'.$data['images'][0];
-            }
-        }
-        if(!isset($_GET['id']) || !$data['offer'])
+        // Handle unprovided offer id and non-existing offer
+        if(!isset($_GET['id']) || empty($this->offers_model->get_by_id($_GET['id'])))
         {
             $this->render("views/templates/header.php");
             $this->render("views/templates/errors/offer_not_found.php");
             $this->render("views/templates/footer.php");
             die;
         }
+        
+        $data['offer'] = $this->offers_model->get_by_id($_GET['id']);
+        $data['thumbnail'] = '/assets/images/no_image.png';
+        $data['is_auction'] = isset($data['offer']['a_auction_id']) && !empty($data['offer']['a_auction_id']);
+        
+        if(is_dir(SITE_PATH.'/uploads/'.$data['offer']['image_path']))
+        {
+            $data['images'] = array_values(array_diff(scandir(SITE_PATH.'/uploads/'.$data['offer']['image_path']), ['.', '..']));
+            $data['thumbnail'] = '/uploads/'.$data['offer']['image_path'].'/'.$data['images'][0];
+        }
+        
         // If email was sent
         if($_POST)
         {

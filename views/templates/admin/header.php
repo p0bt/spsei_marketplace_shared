@@ -19,6 +19,8 @@
     <link href="/assets/css/dashboard.css" rel="stylesheet">
     <link href="/assets/css/datatables.min.css" rel="stylesheet">
     <link href="/assets/css/animate.min.css" rel="stylesheet">
+
+    <link href="/assets/images/icon.ico" rel="icon" type="image/x-icon">
 </head>
 
 <body>
@@ -60,6 +62,7 @@
                         <li class="nav-item"><a class="nav-link active" href="/admin/sprava-umisteni-trid"><i class="fa-solid fa-location-dot mx-2"></i><span>Správa umístění tříd</span></a></li>
                         <li class="nav-item"><a class="nav-link active" href="/admin/sprava-trid"><i class="fa-solid fa-graduation-cap mx-2"></i><span>Správa tříd</span></a></li>
                         <li class="nav-item"><a class="nav-link active" href="/admin/sprava-knih"><i class="fa fa-book mx-2"></i><span>Správa knih</span></a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/admin/sprava-sesitu"><i class="fa fa-book-open mx-2"></i><span>Správa sešitů</span></a></li>
                         <li class="nav-item"><a class="nav-link active" href="/admin/sprava-api-klicu"><i class="fa-solid fa-key mx-2"></i><span>Správa API klíčů</span></a></li>
                     </ul>
                     <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>

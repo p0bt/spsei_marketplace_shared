@@ -72,6 +72,7 @@ class Database
     {
         if(!empty($sql))
         {
+            // https://www.php.net/manual/en/function.array-map.php
             return implode("", (array_map(function($value, $key, $count) {
                 $s = " ";
                 if($key != 0 && $key != $count-1) $s .= "AND ";

@@ -1,4 +1,5 @@
 <?php
+
 use SpseiMarketplace\Core\HelperFunctions;
 ?>
 
@@ -10,7 +11,7 @@ use SpseiMarketplace\Core\HelperFunctions;
 </style>
 
 <div class="container">
-    <?php if($is_auction && !isset($_SESSION['user_data'])): ?>
+    <?php if ($is_auction && !isset($_SESSION['user_data'])) : ?>
         <div class="row mt-2">
             <div class="col-10 mx-auto">
                 <div class="alert alert-danger text-center">
@@ -33,22 +34,21 @@ use SpseiMarketplace\Core\HelperFunctions;
     <div class="row p-5">
         <div class="col-md-6 col-12 order-md-1 order-1">
             <?php
-                // Show book name and it's author or just name in case of notebooks (...)
-                $name = $offer['name'];
+            // Show book name and it's author or just name in case of notebooks (...)
+            $name = $offer['name'];
 
-                if(isset($offer['b_name']) && !empty($offer['b_name']))
-                {
-                    $name = $offer['b_name'].' ('.$offer['b_author'].')';
-                }
+            if (isset($offer['b_name']) && !empty($offer['b_name'])) {
+                $name = $offer['b_name'] . ' (' . $offer['b_author'] . ')';
+            }
             ?>
             <div id="thumbnail mb-md-0 mb-5">
                 <img src="<?= $thumbnail ?>" id="thumbnail-image" class="shadow js-tilt-scale" alt="<?= $name ?>" width="100%" height="auto" data-tilt>
             </div>
         </div>
         <div class="col-12 mb-md-0 mb-5 order-md-3 order-2">
-            <?php if(isset($images) && count($images) > 0): ?>
+            <?php if (isset($images) && count($images) > 0) : ?>
                 <div class="my-2">
-                    <?php for($i = 0; $i < count($images); $i++): ?>
+                    <?php for ($i = 0; $i < count($images); $i++) : ?>
                         <img src="/uploads/<?= $offer['image_path'] ?>/<?= $images[$i] ?>" class="me-1 border border-primary border-2 small-image" alt="<?= $name ?>" height="125">
                     <?php endfor; ?>
                 </div>
@@ -56,21 +56,21 @@ use SpseiMarketplace\Core\HelperFunctions;
         </div>
         <div class="col-md-6 col-12 d-flex justify-content-center align-items-center text-md-start text-center order-md-2 order-3">
             <div>
-                <?php if(isset($_SESSION['user_data']) && $offer['user_id'] == $_SESSION['user_data']['user_id']): ?>
+                <?php if (isset($_SESSION['user_data']) && $offer['user_id'] == $_SESSION['user_data']['user_id']) : ?>
                     <h5 class="my-0"><em>Vaše nabídka</em></h5>
                 <?php endif; ?>
 
                 <h2><?= $name ?></h2>
                 <p class="small">Kategorie: <?= $offer['cat_name'] ?></p>
                 <p><?= $offer['description'] ?></p>
-                
-                <?php if(!$is_auction): ?>
-                    <b>Cena: <?= $offer['price'] == 0 ? "Zdarma" : $offer['price']." Kč" ?></b>
-                <?php else: ?>
+
+                <?php if (!$is_auction) : ?>
+                    <b>Cena: <?= $offer['price'] == 0 ? "Zdarma" : $offer['price'] . " Kč" ?></b>
+                <?php else : ?>
                     <div class="auction my-2 d-flex justify-content-md-start justify-content-center align-items-center">
                         <div class="auction">
                             <div class="auction-info fw-bold"></div>
-                            <?php if(isset($_SESSION['user_data']) && ($offer['user_id'] != $_SESSION['user_data']['user_id'])): ?>
+                            <?php if (isset($_SESSION['user_data']) && ($offer['user_id'] != $_SESSION['user_data']['user_id']) && (strtotime($offer['a_end_date']) >= time())) : ?>
                                 <form method="POST" action="" class="auction-form mt-3" id="auction-form">
                                     <div class="d-flex flew-wrap justify-content-md-start justify-content-center align-items-center">
                                         <div>
@@ -87,7 +87,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                     </div>
                 <?php endif; ?>
 
-                <?php if(!isset($_SESSION['user_data']) || $offer['user_id'] != $_SESSION['user_data']['user_id']): ?>
+                <?php if (!isset($_SESSION['user_data']) || $offer['user_id'] != $_SESSION['user_data']['user_id']) : ?>
                     <div class="row mt-3 g-0">
                         <div class="col-md-2 col-12 p-0 mb-md-0 mb-1">
                             <a type="button" class="h-100 me-md-1 me-0 btn btn-primary d-flex justify-content-center align-items-center" href="#" id="btn-send-message" data-id="<?= $offer['user_id'] ?>"><i class="fa-solid fa-comment"></i></a>
@@ -103,40 +103,39 @@ use SpseiMarketplace\Core\HelperFunctions;
             </div>
         </div>
     </div>
-    <div class="row p-5">
-        <div class="col-md-6 col-12 mx-auto">
-            <h3 class="text-center">Kontaktní formulář</h3>
-            <?php if ($alert = HelperFunctions::getAlert("success")) : ?>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="alert alert-success">
-                            <?= $alert ?>
+    <?php if (isset($_SESSION['user_data']) && $offer['user_id'] != $_SESSION['user_data']['user_id']) : ?>
+        <div class="row p-5">
+            <div class="col-md-6 col-12 mx-auto">
+                <h3 class="text-center">Kontaktní formulář</h3>
+                <?php if ($alert = HelperFunctions::getAlert("success")) : ?>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-success">
+                                <?= $alert ?>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
-            <?php if ($alert = HelperFunctions::getAlert("error")) : ?>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="alert alert-danger">
-                            <?= $alert ?>
+                <?php endif; ?>
+                <?php if ($alert = HelperFunctions::getAlert("error")) : ?>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                <?= $alert ?>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php endif; ?>
-            <form method="POST" action="" id="contact-form">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Váš email</label>
-                    <input type="email" class="form-control" name="email" id="email" value="<?= isset($_SESSION['user_data']['email']) ? $_SESSION['user_data']['email'] : '' ?>" required maxlength="100">
-                </div>
-                <div class="mb-3">
-                    <label for="text" class="form-label">Zpráva</label>
-                    <textarea class="form-control" name="text" id="text" value="<?= HelperFunctions::setInputValue("text") ?>" required maxlength="255" rows="3">Dobrý den,&#10;mám zájem o Váš inzerát č.<?= $offer['offer_id'] ?> [<?= $name ?>]. Je stále platný?&#10;Děkuji za odpověď.</textarea>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Odeslat</button>
-            </form>
+                <?php endif; ?>
+                <form method="POST" action="" id="contact-form">
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Zpráva</label>
+                        <textarea class="form-control" name="message" id="message" value="<?= HelperFunctions::setInputValue("message") ?>" required maxlength="255" rows="3">Dobrý den,&#10;mám zájem o Váš inzerát č.<?= $offer['offer_id'] ?> [<?= $name ?>]. Je stále platný?&#10;Děkuji za odpověď.</textarea>
+                    </div>
+                    <input type="hidden" name="user_id" id="user_id" value="<?= $offer['user_id'] ?>" hidden>
+                    <button type="submit" class="btn btn-primary w-100">Odeslat</button>
+                </form>
+            </div>
         </div>
-    </div>
+    <?php endif; ?>
 </div>
 
 <script>
@@ -145,7 +144,7 @@ use SpseiMarketplace\Core\HelperFunctions;
         // Lines below are called after document is loaded
         show_image($(".small-image")[0]);
 
-        <?php if($is_auction): ?>
+        <?php if ($is_auction) : ?>
             // WebSocket connection
             let socket = io('<?= WEBSOCKETS_PROTOCOL ?>://<?= SITE_URL ?>:<?= WEBSOCKETS_PORT ?>', {
                 secure: true
@@ -158,15 +157,15 @@ use SpseiMarketplace\Core\HelperFunctions;
 
             // Initaliaze
             state = get_current_state(auction_id);
-            
+
             $('.current-auction-info').css("display", (is_auction_in_progress(new Date("<?= $offer['a_start_date'] ?>"), new Date("<?= $offer['a_end_date'] ?>")) ? "block" : "none"));
-        
+
             print_auction_info();
             print_current_time();
             print_auction_state(state);
             check_current_winner();
 
-            let min_bid_value = (state.top_bid.length > 0) ? parseInt(state.top_bid)+1 : 0;
+            let min_bid_value = (state.top_bid.length > 0) ? parseInt(state.top_bid) + 1 : 1;
             $("#bid").attr("placeholder", min_bid_value);
             $("#bid").attr("min", min_bid_value);
 
@@ -177,7 +176,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                 print_auction_state(state);
                 check_current_winner();
 
-                let min_bid_value = (state.top_bid.length > 0) ? parseInt(state.top_bid)+1 : 0;
+                let min_bid_value = (state.top_bid.length > 0) ? parseInt(state.top_bid) + 1 : 1;
                 $("#bid").attr("placeholder", min_bid_value);
                 $("#bid").attr("min", min_bid_value);
             });
@@ -189,17 +188,16 @@ use SpseiMarketplace\Core\HelperFunctions;
                 print_current_time();
 
                 // If user can bid button is available -> else we are showing seconds till next possible bid
-                if(can_user_bid())
-                {
+                if (can_user_bid(auction_id)) {
                     $("#btn-make-bid").html('<i class="fa-solid fa-plus"></i>');
                     $("#btn-make-bid").removeAttr("disabled");
                     i = 0;
-                }
-                else
-                {
+                } else {
                     $("#btn-make-bid").attr("disabled", true);
-                    $("#btn-make-bid").text(parseInt(<?= AUCTION_BID_DELAY ?>) - (i+1));
-                    i++;
+                    if(i < parseInt(<?= AUCTION_BID_DELAY ?>)) {
+                        $("#btn-make-bid").text(parseInt(<?= AUCTION_BID_DELAY ?>) - (i + 1));
+                        i++;
+                    }
                 }
 
                 $('.current-auction-info').css("display", (is_auction_in_progress(new Date("<?= $offer['a_start_date'] ?>"), new Date("<?= $offer['a_end_date'] ?>")) ? "block" : "none"));
@@ -207,7 +205,7 @@ use SpseiMarketplace\Core\HelperFunctions;
 
             $("#auction-form").submit(function(e) {
                 e.preventDefault();
-            
+
                 let bid = parseInt($("#bid").val());
                 rise_price(auction_id, bid);
 
@@ -224,10 +222,9 @@ use SpseiMarketplace\Core\HelperFunctions;
 
             function check_current_winner() {
                 let user_id = "<?= isset($_SESSION['user_data']['user_id']) ? $_SESSION['user_data']['user_id'] : "" ?>";
-                if(state.user_id == user_id) {
+                if (state.user_id == user_id) {
                     confetti.start();
-                }
-                else {
+                } else {
                     confetti.stop();
                 }
             }
@@ -243,11 +240,46 @@ use SpseiMarketplace\Core\HelperFunctions;
                     "user_id": user_id,
                 },
                 success: function(data) {
-                    if(data) {
+                    if (data) {
                         window.location.href = data;
                     }
                 },
             });
+        });
+
+        $("#contact-form").submit(function(e) {
+
+            e.preventDefault();
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/send-message-contact-form",
+                data: {
+                    "user_id": $("#contact-form #user_id").val(),
+                    "message": $("#contact-form #message").val(),
+                },
+                success: function(data) {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Zpráva byla doručena',
+                            text: data.success,
+                            icon: 'success',
+                            showCancelButton: true,
+                            cancelButtonText: 'Zavřít'
+                        });
+                    } else if (data.error) {
+                        Swal.fire({
+                            title: 'Chyba',
+                            text: data.error,
+                            icon: 'error',
+                            showCancelButton: true,
+                            cancelButtonText: 'Zavřít'
+                        });
+                    }
+                },
+            });
+
         });
 
         $(".small-image").click(function() {

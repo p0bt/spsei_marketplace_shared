@@ -69,7 +69,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                         <div class="col me-2">
                             <div class="text-uppercase text-black fw-bold text-xs mb-1"><span>Nastaveno umístění tříd</span></div>
                             <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: <?= $cards['class_room_percentage'] ?>%" aria-valuenow="<?= $cards['class_room_percentage'] ?>" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar" role="progressbar" style="width: <?= $cards['class_room_percentage'] ?>%; background-color: <?= $cards['class_room_percentage'] == 100 ? 'green' : 'red' ?>;" aria-valuenow="<?= $cards['class_room_percentage'] ?>" aria-valuemin="0" aria-valuemax="100">
                                     <small class="justify-content-center d-flex position-absolute w-100"><?= $cards['class_room_percentage'] ?>%</small>
                                 </div>
                             </div>
@@ -80,6 +80,25 @@ use SpseiMarketplace\Core\HelperFunctions;
             </div>
         </div>
     </div>
+    <!--
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="text-primary fw-bold m-0">Socket.io server</h6>
+                </div>
+                <div class="card-body">
+                    <div id="socketio-shell-output" class="col-md-8 col-12">
+
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <button type="button" id="start-socketio-server" class="btn btn-success text-uppercase">Zapnout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    -->
     <div class="row">
         <div class="col-lg-6 col-xl-7">
             <div class="card shadow mb-4">
@@ -160,7 +179,7 @@ use SpseiMarketplace\Core\HelperFunctions;
                         <li class="list-group-item">
                             <div class="row align-items-center no-gutters">
                                 <div class="col-auto">
-                                    <img src="<?= $thumbnail ?>" alt="<?= $name ?>" height="100">
+                                    <img src="<?= $thumbnail ?>" alt="<?= $name ?>" height="100" class="w-100">
                                 </div>
                                 <div class="col mx-2">
                                     <h6 class="mb-0">
@@ -290,7 +309,32 @@ use SpseiMarketplace\Core\HelperFunctions;
         });
 
         setInterval(function() {
+            // Reload running processes table
             dataTable.ajax.reload(null, false);
+
+            // Reload Socket.io status info
+            /*
+            $.ajax({
+                type: "GET",
+                dataSrc: "",
+                dataType: "json",
+                url: "/ajax/get-socketio-shell-output",
+                success: function(data) {
+                    $("#socketio-shell-output").text(data);
+                },
+            });*/
         }, 1000);
+
+        $("#start-socketio-server").click(function() {
+            $.ajax({
+                type: "GET",
+                dataSrc: "",
+                dataType: "json",
+                url: "/ajax/start-socketio-server",
+                success: function(data) {
+                    console.log(data);
+                },
+            });
+        });
     });
 </script>

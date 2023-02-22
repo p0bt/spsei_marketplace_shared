@@ -9,10 +9,26 @@ class BannedIp extends BaseModel
                                 FROM `banned_ips`")->getResultArray();
     }
 
-    public function delete_by_id($banned_ip_id)
+    public function get_by_id($bi_id)
+    {
+        return $this->db->query("SELECT * 
+                                FROM `banned_ips`
+                                WHERE bi_id = ?",
+                                [$bi_id])->getRowArray();
+    }
+
+    public function delete_by_id($bi_id)
     {
         $this->db->query("DELETE FROM `banned_ips` 
                         WHERE `bi_id` = ?", 
-                        [$banned_ip_id]);
+                        [$bi_id]);
+    }
+
+    public function update($data, $bi_id)
+    {
+        return $this->db->query("UPDATE `banned_ips` 
+                                SET ip_address = ?
+                                WHERE bi_id = ?", 
+                                [$data['ip_address'], $bi_id]);
     }
 }

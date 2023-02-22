@@ -9,7 +9,7 @@
             <table class="table table-striped" id="users-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>ID uživatele</th>
                         <th>Email</th>
                         <th>Jméno</th>
                         <th>Příjmení</th>
@@ -58,10 +58,16 @@
                 },
                 {
                     data: null,
+                    width: '20%',
                     render: function(data, type, row) {
-                        let render = '<a type="button" href="mailto:' + row['email'] + '" class="btn btn-primary mr-1"><i class="fa-solid fa-envelope"></i></a>';
-                        render += '<a type="button" href="?ban=' + row['ip_address'] + '" class="btn btn-danger mr-1"><i class="fa-solid fa-ban"></i></a>';
-                        render += '<a type="button" href="?unban=' + row['ip_address'] + '" class="btn btn-success mr-1"><i class="fa-solid fa-circle-check"></i></a>';
+                        let render = '<a type="button" href="mailto:' + row['email'] + '" class="btn btn-primary mr-2"><i class="fa-solid fa-envelope"></i></a>';
+                        // You can't ban/unban your own IP address, that would be annoying XD
+                        if(row['ip_address'] != "<?= $_SESSION['user_data']['ip_address'] ?>") {
+                            render += '<a type="button" href="?ban=' + row['ip_address'] + '" class="btn btn-danger mr-2"><i class="fa-solid fa-ban"></i></a>';
+                            render += '<a type="button" href="?unban=' + row['ip_address'] + '" class="btn btn-success mr-2"><i class="fa-solid fa-circle-check"></i></a>';
+                        }
+                        
+                        render += '<a type="button" href="/admin/upravit-uzivatele?id=' + row['user_id'] + '" class="btn btn-primary mr-2"><i class="fa-solid fa-pencil"></i></a>';
                         return render;
                     },
                 },
@@ -72,5 +78,9 @@
                 }
             }
         });
+
+        <?php if(isset($_GET['find']) && !empty($_GET['find'])): ?>
+            dataTable.column(0).search(<?= $_GET['find'] ?>).draw();
+        <?php endif; ?>
     });
 </script>

@@ -96,7 +96,7 @@ class Validator
         if(isset($parsed_rules))
         {
             // Loop through all rules
-            foreach($parsed_rules as $rule)
+            foreach($parsed_rules as $key => &$rule)
             {
                 $input_name = $rule['input_name'];
                 $input_value = null;
@@ -112,9 +112,20 @@ class Validator
                     $rule_value = $match[2];
                 }
 
-                // If input can be empty, and it's empty -> continue
-                if(((empty($input_value) || !isset($input_value)) && $rule_name == "permit_empty"))
+                // If input can be empty, and it's empty
+                if((empty($input_value) || !isset($input_value)) && $rule_name == "permit_empty")
                 {
+                    // Remove input from validation (both parsed rules and attribute rules)
+                    $index = array_search($input_name, array_column($this->rules, "input_name"));
+                    unset($this->rules[$index]);
+
+                    $indexes = array_keys(array_column($parsed_rules, "input_name"), $input_name);
+
+                    array_map(function($value) use(&$parsed_rules) {
+                        unset($parsed_rules[$value]);
+                    }, $indexes);
+
+                    // Continue validating other inputs
                     continue;
                 }
                 else

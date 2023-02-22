@@ -1,4 +1,10 @@
-<h4 class="mb-5">Moje vyhrané aukce</h4>
+<div class="row my-5">
+        <div class="col-12">
+            <div class="card bg-dark py-2 text-white text-center">
+                <h1>Moje vyhrané aukce</h1>
+            </div>
+        </div>
+    </div>
 <?php if (!empty($won_auctions)) : ?>
     <?php foreach ($won_auctions as $won_auction) : ?>
         <?php
@@ -44,7 +50,7 @@
     </div>
 <?php else : ?>
     <p>
-        Zatím nemáte žádné nabídky.
-        <a href="/nova-nabidka">Zveřejnit nabídku</a>
+        Zatím nemáte žádné vyhrané aukce.
+        <a href="/nabidky?price_type=aukce">Procházet aukce</a>
     </p>
 <?php endif; ?>

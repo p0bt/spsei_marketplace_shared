@@ -15,6 +15,8 @@ use SpseiMarketplace\Models\Auction;
 use SpseiMarketplace\Models\Api;
 use SpseiMarketplace\Models\Category;
 use SpseiMarketplace\Models\Major;
+use SpseiMarketplace\Core\FormGenerator;
+use SpseiMarketplace\Models\Notebook;
 
 class AdminController extends BaseController
 {
@@ -25,10 +27,12 @@ class AdminController extends BaseController
     private $offers_model;
     private $classes_model;
     private $books_model;
+    private $notebooks_model;
     private $class_room_model;
     private $banned_ip_model;
     private $notifications_model;
     private $auctions_model;
+    private $api_model;
     private $category_model;
     private $majors_model;
 
@@ -41,6 +45,7 @@ class AdminController extends BaseController
         $this->offers_model = new Offer();
         $this->classes_model = new SchoolClass();
         $this->books_model = new Book();
+        $this->notebooks_model = new Notebook();
         $this->class_room_model = new ClassRoom();
         $this->banned_ip_model = new BannedIp();
         $this->notifications_model = new Notification();
@@ -48,6 +53,9 @@ class AdminController extends BaseController
         $this->api_model = new Api();
         $this->category_model = new Category();
         $this->majors_model = new Major();
+
+        // Replace empty (= empty string '') values in $_POST with NULL
+        HelperFunctions::replaceEmptyWithNull($_POST);
     }
 
     public function dashboard()
@@ -92,12 +100,12 @@ class AdminController extends BaseController
     
     public function user_maintenance()
     {
-        if(isset($_GET['ban']) && $_GET['ban'] != "null")
+        if(isset($_GET['ban']) && $_GET['ban'] != "null" && $_GET['ban'] != $_SESSION['user_data']['ip_address'])
         {
             $this->users_model->ban_ip($_GET['ban']);
             unset($_GET['ban']);
         }
-        else if(isset($_GET['unban']) && $_GET['unban'] != "null")
+        else if(isset($_GET['unban']) && $_GET['unban'] != "null" && $_GET['unban'] != $_SESSION['user_data']['ip_address'])
         {
             $this->users_model->unban_ip($_GET['unban']);
             unset($_GET['unban']);
@@ -107,6 +115,46 @@ class AdminController extends BaseController
         
         $this->render("views/templates/admin/header.php");
         $this->render("views/admin/user_maintenance.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function user_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->users_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-uzivatele?id=".$id, "POST", ["users"], "Editace uživatele (ID: ".$id.")");
+        $form_generator->set_fields_from_tables([
+            "users" => ["first_name", "last_name", "class_id", "email", "ip_address", "admin", "last_update", "register_date"],
+        ]);
+
+        if($_POST)
+        {
+            $_POST['admin'] = isset($_POST['admin']) ? 1 : 0;
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+            if ($this->validator->run())
+            {
+                $this->users_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-uzivatelu' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
         $this->render("views/templates/admin/footer.php");
     }
 
@@ -124,12 +172,119 @@ class AdminController extends BaseController
         $this->render("views/templates/admin/footer.php");
     }
 
+    public function offer_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->offers_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-nabidku?id=".$id, "POST", ["offers"], "Editace nabídky (ID: ".$id.")");
+        $form_generator->set_fields_from_tables([
+            "offers" => ["user_id", "notebook_id", "book_ISBN", "description", "price", "image_path", "date"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {
+                $this->offers_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-nabidek' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
     public function auction_maintenance()
     {
         $data['auctions'] = $this->auctions_model->get_all();
 
         $this->render("views/templates/admin/header.php");
         $this->render("views/admin/auction_maintenance.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function auction_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->auctions_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        // Edit offer and auction at the same time
+        if(isset($_GET['offer_included']))
+        {
+            $form_generator = new FormGenerator("/admin/upravit-aukci?id=".$id."&offer_included=ano", "POST", ["auctions", "offers"], "Editace aukce včetně nabídky (ID: ".$id.")", [], [
+                "class" => "mb-5"
+            ]);
+            $form_generator->set_fields_from_tables([
+                "auctions" => ["offer_id", "top_bid", "user_id", "start_date", "end_date"],
+                "offers" => ["user_id", "notebook_id", "book_ISBN", "description", "price", "image_path", "date"],
+            ]);
+        }
+        // Edit just offer
+        else
+        {
+            $form_generator = new FormGenerator("/admin/upravit-aukci?id=".$id, "POST", ["auctions"], "Editace aukce (ID: ".$id.")", [], [
+                "class" => "mb-5"
+            ]);
+            $form_generator->set_fields_from_tables([
+                "auctions" => ["offer_id", "top_bid", "user_id", "start_date", "end_date"],
+            ]);
+        }
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {
+                // Edit offer and auction at the same time
+                if(isset($_GET['offer_included']))
+                {
+                    $this->offers_model->update($_POST, $_POST['offer_id']);
+                    $this->auctions_model->update($_POST, $id);
+                }
+                // Edit just offer
+                else
+                {
+                    $this->auctions_model->update($_POST, $id);
+                }
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-aukci' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
         $this->render("views/templates/admin/footer.php");
     }
 
@@ -165,6 +320,48 @@ class AdminController extends BaseController
         $this->render("views/templates/admin/footer.php");
     }
 
+    public function class_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->classes_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-tridu?id=".$id, "POST", ["classes"], "Editace třídy (ID: ".$id.")", [], [
+            "class" => "mb-5"
+        ]);
+        $form_generator->set_fields_from_tables([
+            "classes" => ["name"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {
+                $this->classes_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-trid' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
     public function book_maintenance()
     {
         if($_POST)
@@ -191,7 +388,7 @@ class AdminController extends BaseController
                 $this->books_model->post($post_data);
             }
         }
-        if(isset($_GET['delete']))
+        if(isset($_GET['delete']) && !empty($_GET['delete']))
         {
             $this->books_model->delete_by_id($_GET['delete']);
         }
@@ -205,6 +402,109 @@ class AdminController extends BaseController
 
         $this->render("views/templates/admin/header.php");
         $this->render("views/admin/book_maintenance.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function book_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->books_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-knihu?id=".$id, "POST", ["books"], "Editace knihy (ID: ".$id.")", [], [
+            "class" => "mb-5"
+        ]);
+        $form_generator->set_fields_from_tables([
+            "books" => ["book_ISBN", "name", "author", "category_id", "grade", "major_id"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {   
+                $this->books_model->update($_POST, $id);
+                // In case we updated book_ISBN:
+                $parameters = $_GET;
+                $parameters['id'] = $_POST['book_ISBN'];
+                header("Location: /admin/upravit-knihu?".http_build_query($parameters));
+                die;
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-knih' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function notebook_maintenance()
+    {
+        if(isset($_GET['delete']) && !empty($_GET['delete']))
+        {
+            $this->notebooks_model->delete_by_id($_GET['delete']);
+        }
+
+        $data['notebooks'] = $this->notebooks_model->get_all();
+
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/admin/notebook_maintenance.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function notebook_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->notebooks_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-sesit?id=".$id, "POST", ["notebooks"], "Editace sešitu (ID: ".$id.")", [], [
+            "class" => "mb-5"
+        ]);
+        $form_generator->set_fields_from_tables([
+            "notebooks" => ["name", "grade", "major_id"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {   
+                $this->notebooks_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-sesitu' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
         $this->render("views/templates/admin/footer.php");
     }
 
@@ -237,6 +537,48 @@ class AdminController extends BaseController
         $this->render("views/templates/admin/footer.php");
     }
 
+    public function cr_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->class_room_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-umisteni-tridy?id=".$id, "POST", ["class_room"], "Editace umístění třídy (ID: ".$id.")", [], [
+            "class" => "mb-5"
+        ]);
+        $form_generator->set_fields_from_tables([
+            "class_room" => ["class_id", "room_code"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {
+                $this->class_room_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-umisteni-trid' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
     public function banned_ip_maintenance()
     {
         if(isset($_GET['unban']) && $_GET['unban'] != "null")
@@ -248,6 +590,48 @@ class AdminController extends BaseController
 
         $this->render("views/templates/admin/header.php");
         $this->render("views/admin/banned_ip_maintenance.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function banned_ip_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->banned_ip_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-zablokovanou-ip?id=".$id, "POST", ["banned_ips"], "Editace zablokované IP adresy (ID: ".$id.")", [], [
+            "class" => "mb-5"
+        ]);
+        $form_generator->set_fields_from_tables([
+            "banned_ips" => ["ip_address"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {
+                $this->banned_ip_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-zablokovanych-ip' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
         $this->render("views/templates/admin/footer.php");
     }
 
@@ -284,6 +668,48 @@ class AdminController extends BaseController
 
         $this->render("views/templates/admin/header.php");
         $this->render("views/admin/api_key_maintenance.php", $data);
+        $this->render("views/templates/admin/footer.php");
+    }
+
+    public function api_key_edit()
+    {
+        if(!isset($_GET['id']) || empty($_GET['id']) || empty($this->api_model->get_by_id($_GET['id'])))
+        {
+            header('Location: /polozka-neexistuje');
+            return;
+        }
+
+        $id = $_GET['id'];
+
+        $form_generator = new FormGenerator("/admin/upravit-api-klic?id=".$id, "POST", ["api_keys"], "Editace API klíče (ID: ".$id.")", [], [
+            "class" => "mb-5"
+        ]);
+        $form_generator->set_fields_from_tables([
+            "api_keys" => ["api_key", "description", "expiration_date"],
+        ]);
+
+        if($_POST)
+        {
+            $this->validator->addMultipleRules($form_generator->get_validation_rules());
+
+            if ($this->validator->run())
+            {
+                $this->api_model->update($_POST, $id);
+            }
+            else 
+            {
+                $data['errors'] = $this->validator->getErrors();
+            }
+        }
+
+        // Prefill form after form submission so we get new data
+        $form_generator->prefill_form_by_id($id);
+
+        $data['back_btn'] = "<a href='/admin/sprava-api-klicu' class='my-1 btn btn-primary text-uppercase'><i class='fa-solid fa-arrow-left'></i> Zpět</a>";
+        $data['edit_form'] = $form_generator->get_html_result();
+        
+        $this->render("views/templates/admin/header.php");
+        $this->render("views/templates/admin/edit.php", $data);
         $this->render("views/templates/admin/footer.php");
     }
 }

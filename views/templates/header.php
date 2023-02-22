@@ -70,7 +70,13 @@
                             <a class="nav-link text-white" href="/nabidky?category%5B%5D=sesity"><i class="fa-solid fa-book-open me-2"></i></i>Sešity</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="/nabidky?category%5B%5D=ucebnice"><i class="fa-solid fa-book me-2"></i></i>Učebnice</a>
+                            <a class="nav-link text-white" href="/nabidky?category%5B%5D=povinne_ucebnice"><i class="fa-solid fa-book me-2"></i></i>Povinné učebnice</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/nabidky?category%5B%5D=doporucene_ucebnice"><i class="fa-solid fa-book me-2"></i></i>Doporučené učebnice</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="/nabidky?category%5B%5D=povinna_cetba"><i class="fa-solid fa-book me-2"></i></i>Povinná četba</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/prihlaseni"><i class="fa-solid fa-lock me-2"></i>Přihlásit se</a>
@@ -105,7 +111,13 @@
                                         <a class="dropdown-item" href="/nabidky?category%5B%5D=sesity"><i class="fa-solid fa-book-open me-2"></i>Sešity</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/nabidky?category%5B%5D=ucebnice"><i class="fa-solid fa-book me-2"></i>Učebnice</a>
+                                        <a class="dropdown-item" href="/nabidky?category%5B%5D=povinne_ucebnice"><i class="fa-solid fa-book me-2"></i></i>Povinné učebnice</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/nabidky?category%5B%5D=doporucene_ucebnice"><i class="fa-solid fa-book me-2"></i></i>Doporučené učebnice</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/nabidky?category%5B%5D=povinna_cetba"><i class="fa-solid fa-book me-2"></i></i>Povinná četba</a>
                                     </li>
                                 </ul>
                             </li>

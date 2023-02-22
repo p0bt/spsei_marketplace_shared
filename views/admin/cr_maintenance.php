@@ -11,6 +11,7 @@
                     <tr>
                         <th>Název třídy</th>
                         <th>Kód místnosti</th>
+                        <th>Akce</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,7 +61,16 @@
                 {
                     data: null,
                     render: function(data, type, row) {
-                        return '<input type="text" class="form-control text-center w-auto mx-auto font-weight-bold input-room-code" name="room_code" value="' + row['room_code'] + '" data-id="' + row['class_id'] + '" minlength="4" maxlength="4">';
+                        let render = '<input type="text" class="form-control text-center w-auto mx-auto font-weight-bold input-room-code" name="room_code" value="' + row['room_code'] + '" data-id="' + row['class_id'] + '" minlength="4" maxlength="4">';
+                        return render;
+                    },
+                },
+                {
+                    data: 'cr_id',
+                    render: function(data, type, row) {
+                        let render = '<a type="button" href="/admin/sprava-umisteni-trid?delete=' + data + '" class="btn btn-danger mr-2"><i class="fa-solid fa-trash-can"></i></a>';
+                        render += '<a type="button" href="/admin/upravit-umisteni-tridy?id=' + data + '" class="btn btn-primary mr-2"><i class="fa-solid fa-pencil"></i></a>';
+                        return render;
                     },
                 },
             ]

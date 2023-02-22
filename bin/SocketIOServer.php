@@ -4,8 +4,8 @@ namespace SpseiMarketplace\Core;
 
 // This has to be required because this is fired via CMD :D
 // Vendor autoloading classes
-require '../vendor/autoload.php';
-require '../config.php';
+require realpath('../vendor/autoload.php');
+require realpath('../config.php');
 
 use Workerman\Worker;
 use PHPSocketIO\SocketIO;

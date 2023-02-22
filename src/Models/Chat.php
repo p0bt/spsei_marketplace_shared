@@ -32,10 +32,16 @@ class Chat extends BaseModel
 
     public function get_chat_id($my_user_id, $target_user_id)
     {
-        $result = $this->db->query("SELECT c.chat_id AS 'chat_id' 
+        $result = $this->db->query("SELECT chat_id
+                                FROM chats
+                                WHERE chat_id IN (SELECT chat_id FROM chats WHERE user_id = ?)
+                                AND user_id = ?", [$my_user_id, $target_user_id])->getRowArray();
+
+        /*$result = $this->db->query("SELECT c.chat_id AS 'chat_id' 
                                     FROM chats c
                                     INNER JOIN (SELECT chat_id FROM chats GROUP BY chat_id HAVING COUNT(*) > 1) o ON o.chat_id = c.chat_id
                                     WHERE user_id IN (?, ?)", [$my_user_id, $target_user_id])->getRowArray();
+                                    */
                                     
         return ($result ? $result['chat_id'] : false);
     }

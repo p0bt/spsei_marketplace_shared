@@ -29,8 +29,10 @@
             <table class="table table-striped" id="auctions-table">
                 <thead>
                     <tr>
-                        <th>ID Nabídky</th>
+                        <th>ID aukce</th>
+                        <th>Nabídka</th>
                         <th>Nejvyšší příhoz</th>
+                        <th>Aktuální vyhravající</th>
                         <th>Začátek aukce</th>
                         <th>Konec aukce</th>
                         <th>Akce</th>
@@ -63,13 +65,27 @@
             order: [[0, "desc"]],
             columns: [
                 {
+                    data: "auction_id",
+                },
+                {
                     data: "offer_id",
+                    render: function(data, type, row) {
+                        return "<a href='/admin/sprava-nabidek?find=" + data + "'><i class='fa-solid fa-eye text-dark'></i></a>";
+                    },
                 },
                 {
                     data: "top_bid",
                     render: function(data, type, row) {
                         if(data !== null && data != "")
                             return data + " Kč";
+                        return "-";
+                    },
+                },
+                {
+                    data: "user_id",
+                    render: function(data, type, row) {
+                        if(data !== null && data != "")
+                            return '<a href="/admin/sprava-uzivatelu?find=' + data + '">ID: ' + data + '</a>';
                         return "-";
                     },
                 },
@@ -82,7 +98,10 @@
                 {
                     data: "auction_id",
                     render: function(data, type, row) {
-                        return '<a href="/admin/sprava-aukci?end_auction=' + data + '" class="btn btn-danger"><i class="fa-solid fa-hand"></i></a>';
+                        let render = '<a href="/admin/sprava-aukci?end_auction=' + data + '" class="btn btn-danger mr-2"><i class="fa-solid fa-hand"></i></a>';
+                        render += '<a type="button" href="/admin/upravit-aukci?id=' + data + '" class="btn btn-primary mr-2"><i class="fa-solid fa-pencil"></i></a>';
+                        render += '<a type="button" href="/admin/upravit-aukci?id=' + data + '&offer_included=ano" class="btn btn-secondary mr-2"><i class="fa-solid fa-pencil"></i></a>';
+                        return render;
                     },
                 },
             ]
@@ -92,5 +111,9 @@
             selected_value = $(this).val();
             dataTable.ajax.reload(null, false);
         });
+
+        <?php if(isset($_GET['find']) && !empty($_GET['find'])): ?>
+            dataTable.column(0).search(<?= $_GET['find'] ?>).draw();
+        <?php endif; ?>
     });
 </script>

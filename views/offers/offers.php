@@ -94,17 +94,19 @@ use SpseiMarketplace\Core\HelperFunctions;
 
 <script>
     function init_slider() {
+        $("input[name='price']").val(1 + ' ' + <?= $max_price ?>);
+
         $('#slider-range').slider({
             range: true,
-            min: 0,
+            min: 1,
             max: <?= $max_price ?>,
-            values: [0, 20000],
+            values: [1, 20000],
             slide: function(event, ui) {
                 $('#text-price').val(ui.values[0] + ' - ' + ui.values[1] + ' Kč');
                 $("input[name='price']").val(ui.values[0] + ' ' + ui.values[1]);
             }
         });
-        $('#text-price').val(0 + ' - ' + <?= $max_price ?> + ' Kč');
+        $('#text-price').val(1 + ' - ' + <?= $max_price ?> + ' Kč');
     }
 </script>
 <script>

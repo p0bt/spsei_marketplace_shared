@@ -8,7 +8,7 @@
 <div class="container min-vh-100">
     <div class="row my-5">
         <div class="col-12">
-            <div class="card banner-gradient py-2 text-white text-center">
+            <div class="card bg-dark py-2 text-white text-center">
                 <h1>Oblíbené</h1>
             </div>
         </div>
@@ -34,7 +34,7 @@
                                 }
 
                                 $name = $offer['name'];
-                                if(isset($offer['b_name']))
+                                if(isset($offer['b_name']) && !empty($offer['b_name']))
                                 {
                                     $name = $offer['b_name'].' ('.$offer['b_author'].')';
                                 }
@@ -74,9 +74,10 @@
                                                 "offer_id" => $offer['offer_id'],
                                                 "name" => $name,
                                                 "email" => $offer['email'],
+                                                "user_id" => $offer['user_id'],
                                             ];
                                         ?>
-                                        <button type="button" class="btn btn-send-mail" data-offer="<?= htmlspecialchars(json_encode($data)) ?>"><i class="fa-solid fa-paper-plane text-primary"></i></button>
+                                        <button type="button" class="btn btn-send-message" data-offer="<?= htmlspecialchars(json_encode($data)) ?>"><i class="fa-solid fa-paper-plane text-primary"></i></button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -91,9 +92,11 @@
         </div>
     </div>
     <?php if(count($suggestions['offers']) > 0): ?>
-        <div class="row my-5 bg-white py-2">
+        <div class="row my-5">
             <div class="col-12">
-                <h3>Nabídky pro vás</h3>
+                <div class="card bg-dark py-2 text-white text-center">
+                    <h1>Nabídky pro vás</h1>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -140,9 +143,11 @@
         </div>
     <?php endif; ?>
     <?php if(count($suggestions['auctions']) > 0): ?>
-        <div class="row my-5 bg-white py-2">
+        <div class="row my-5">
             <div class="col-12">
-                <h3>Aukce pro vás</h3>
+                <div class="card bg-dark py-2 text-white text-center">
+                    <h1>Aukce pro vás</h1>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -205,15 +210,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Váš email</label>
-                        <input type="email" class="form-control" name="email" id="email" value="<?= isset($_SESSION['user_data']['email']) ? $_SESSION['user_data']['email'] : '' ?>" required maxlength="100">
-                    </div>
-                    <div class="mb-3">
-                        <label for="text" class="form-label">Zpráva</label>
-                        <textarea type="text" class="form-control" name="text" id="text" required maxlength="255" rows="4"></textarea>
+                        <label for="message" class="form-label">Zpráva</label>
+                        <textarea type="text" class="form-control" name="message" id="message" required maxlength="255" rows="4"></textarea>
                     </div>
                 </div>
-                <input type="hidden" name="receiver" id="receiver" hidden>
+                <input type="hidden" name="user_id" id="user_id" value="" hidden>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Odeslat</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
@@ -231,7 +232,7 @@
 
     $(document).ready(function() {
 
-        let data = null;
+        let data_offer = null;
         print_auction_info();
 
         $(".btn-delete-offer-from-wishlist").click(function() {
@@ -239,16 +240,16 @@
             add_or_delete_from_wishlist(offer_id);
         });
 
-        $(".btn-send-mail").click(function() {
-            data = $(this).data('offer');
+        $(".btn-send-message").click(function() {
+            data_offer = $(this).data('offer');
 
-            let text = "Dobrý den,\nmám zájem o Váš inzerát č." + data.offer_id + " [" + data.name + "]. Je stále platný?\nDěkuji za odpověď.";
+            let text = "Dobrý den,\nmám zájem o Váš inzerát č." + data_offer.offer_id + " [" + data_offer.name + "]. Je stále platný?\nDěkuji za odpověď.";
 
             $("#email-modal").modal('show');
 
-            $("#email-modal #text").val(text);
+            $("#email-modal #message").val(text);
 
-            $("#email-modal #receiver").val(data.email);
+            $("#email-modal #user_id").val(data_offer.user_id);
         });
 
         $("#contact-form").submit(function(e) {
@@ -259,11 +260,10 @@
             $.ajax({
                 type: "POST",
                 dataType: "json",
-                url: "/ajax/send-email",
+                url: "/send-message-contact-form",
                 data: {
-                    "email": $("#contact-form #email").val(),
-                    "text": $("#contact-form #text").val(),
-                    "receiver": $("#contact-form #receiver").val(),
+                    "user_id": $("#contact-form #user_id").val(),
+                    "message": $("#contact-form #message").val(),
                 },
                 success: function(data) {
                     if(data.success) {
@@ -276,7 +276,7 @@
                             cancelButtonText: 'Ne'
                             }).then((result) => {
                             if (result.isConfirmed) {
-                                add_or_delete_from_wishlist(data.offer_id);
+                                add_or_delete_from_wishlist(data_offer.offer_id);
                             }
                         });
                     } else if (data.error) {

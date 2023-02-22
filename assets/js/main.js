@@ -117,7 +117,7 @@ function rise_price(auction_id, new_price) {
     });
 }
 
-function can_user_bid() {
+function can_user_bid(auction_id) {
     let result;
 
     $.ajax({
@@ -125,11 +125,15 @@ function can_user_bid() {
         async: false,
         dataType: "json",
         url: "/can-user-bid",
-        data: null,
+        data: {
+            "auction_id": auction_id
+        },
         success: function(data) {
             result = data;
         },
     });
+
+    console.log(auction_id);
 
     return result;
 }
